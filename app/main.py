@@ -1,12 +1,21 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.contest import router as contest_router
 from app.api.submission import router as submission_router
 from app.api.question import router as question_router
-from app.api.students import router as student_router  # Fixed import
+from app.api.students import router as student_router 
 
-app = FastAPI(title="Contest-Based System API", version="1.0")
+app = FastAPI()
 
-# Register API routers
+#cors origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],  
+    )
+
+#initial routes
 app.include_router(student_router, prefix="/api/student", tags=["Students"])
 app.include_router(submission_router, prefix="/api/submission", tags=["Submissions"])
 app.include_router(contest_router, prefix="/api/contest", tags=["Contests"])

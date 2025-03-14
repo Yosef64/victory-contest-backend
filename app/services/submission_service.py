@@ -4,7 +4,7 @@ class SubmissionService:
     @staticmethod
     def get_all_submissions():
         return SubmissionRepository.get_all_submissions()
-
+   
     @staticmethod
     def get_submissions_with_student_info():
         return SubmissionRepository.get_submissions_with_student_info()
@@ -15,13 +15,19 @@ class SubmissionService:
     
     @staticmethod
     def create_submission(submission: SubmissionSchema):
-        try:
-            submission_data = submission.dict()
-            
-            response, status_code = SubmissionRepository.save_submission(submission_data)
+       
+        submission_data = submission.dict()
+        
+        response, status_code = SubmissionRepository.save_submission(submission_data)
 
-            return response, status_code
-        except Exception as e:
-            print(f"🔥 Internal Server Error: {e}")  # Debugging
-            return {"error": f"Internal server error: {str(e)}"}, 500
+        return response, status_code
+    @staticmethod
+    def get_submissions_by_contest(contest_id):
+        submission = SubmissionRepository.get_submissions_by_contest(contest_id)
+        return submission
+    @staticmethod
+    def put_wrong_answers(user_id):
+        SubmissionRepository.put_wrong_answers(user_id)
+        return
+        
 

@@ -1,5 +1,5 @@
 __pycache__/
-env/
+.env
 venv/
 *.pyc
 *.pyo
@@ -8,3 +8,5 @@ venv/
 .idea/
 .vscode/
 app/db/key.json
+.gitignore
+.env

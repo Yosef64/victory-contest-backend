@@ -14,7 +14,7 @@ class ContestRepository:
     @staticmethod
     def add_contest(data):
         contest_id = str(uuid4()).replace("-", "")
-        CONTEST_REF.document(contest_id).set({**data, "active_contestant": [], "submissions": [], "contest_id": contest_id})
+        CONTEST_REF.document(contest_id).set({**data, "active_contestant": [], "submissions": [], "id": contest_id})
         return contest_id
 
     @staticmethod

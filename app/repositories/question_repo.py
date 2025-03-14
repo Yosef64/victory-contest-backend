@@ -5,6 +5,12 @@ class QuestionRepository:
     @staticmethod
     def get_questions():
         return [doc.to_dict() for doc in QUESTION_REF.stream()]
+    
+    @staticmethod
+    def add_questions(questions):
+        for question in questions:
+            QuestionRepository.add_question(question)
+        return True
 
     @staticmethod
     def add_question(data):
