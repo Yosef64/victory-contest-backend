@@ -10,3 +10,4 @@ venv/
 app/db/key.json
 .gitignore
 .env
+TEST.PY

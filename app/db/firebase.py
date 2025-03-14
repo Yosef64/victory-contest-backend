@@ -4,7 +4,7 @@ import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-base64_key = os.getenv("FIREBASE_CREDENTIALS")  # Ensure this is set
+base64_key = os.getenv("FIREBASE_CREDENTIALS") 
 
 if base64_key:
     firebase_key_json = json.loads(base64.b64decode(base64_key).decode('utf-8'))
