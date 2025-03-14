@@ -6,7 +6,7 @@ class QuestionService:
         return QuestionRepository.get_questions()
     
     @staticmethod
-    def get_questions(questions):
+    def add_questions(questions):
         return QuestionRepository.add_questions(questions)
 
     @staticmethod
@@ -14,8 +14,8 @@ class QuestionService:
         return QuestionRepository.add_question(data)
 
     @staticmethod
-    def update_question(question_id, data):
-        return QuestionRepository.update_question(question_id, data)
+    def update_question( data):
+        return QuestionRepository.update_question(data)
 
     @staticmethod
     def delete_question(question_id):

@@ -19,8 +19,8 @@ class QuestionRepository:
         return question_id
 
     @staticmethod
-    def update_question(question_id, data):
-        QUESTION_REF.document(question_id).update(data)
+    def update_question(data):
+        QUESTION_REF.document(data.id).update(data)
         return True
 
     @staticmethod

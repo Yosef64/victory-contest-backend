@@ -31,9 +31,9 @@ async def addQuestions(request:Request):
 @router.put("/updatequestion/{question_id}")
 async def update_question(request):
     data = await request.json()
-    question_id, question = data["question_id"],data["question"]
+    question = data["question"]
     try:
-        QuestionService.update_question(question_id, question.dict(exclude_none=True))
+        QuestionService.update_question(question.dict(exclude_none=True))
         return JSONResponse({"message": "success"},status_code=200)
     except Exception as e:
         raise JSONResponse({"message":e},status_code=500, detail=str(e))
