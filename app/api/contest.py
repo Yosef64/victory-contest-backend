@@ -15,9 +15,8 @@ async def get_all_contests():
         return JSONResponse({"message":e},status_code=200)
 
 @router.get("/{contest_id}")
-async def get_contest_by_id(request:Request):
-    data = await request.json()
-    contest_id = data["contest_id"] 
+async def get_contest_by_id(request:Request,contest_id):
+   
     try:
         contest = ContestService.get_contest_by_id(contest_id)
         if not contest:
