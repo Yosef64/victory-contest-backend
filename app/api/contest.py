@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from app.schemas.contest import ContestSchema, ContestUpdateSchema
 from app.services.contest_service import ContestService
+from app.services.telegram_service import TelegramBot
 
 router = APIRouter()
 
@@ -51,6 +52,15 @@ async def delete_contest(contest_id:str):
     try:
         ContestService.delete_contest(contest_id)
         return JSONResponse({"message": "success"},status_code=200)
+    except Exception as e:
+        return JSONResponse({"message":e},status_code=500)
+@router.post("/announce")
+async def anounceContest(request:Request):
+    data = await request.json()
+    contest = data["contest"]
+    try:
+        TelegramBot.send_message_to_all(contest)
+        return JSONResponse({"message":"success"},status_code=200)
     except Exception as e:
         return JSONResponse({"message":e},status_code=500)
 
