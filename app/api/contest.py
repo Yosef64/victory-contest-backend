@@ -41,11 +41,19 @@ async def reschedule_contest(request:Request):
     contest_id, contest = data["contest_id"],data["contest"]
     try:
 
-        ContestService.update_contest(contest_id, contest.model_dump(exclude_none=True))
+        ContestService.update_contest(contest_id, contest)
         return JSONResponse({"message": "success"},status_code=200)
     except Exception as e:
         return JSONResponse({"message":e},status_code=500)
-
+@router.patch("/{contest_id}")
+async def update_contest(request:Request,contest_id:str):
+    data = await request.json()
+    updatedData = data.get("data")
+    try:
+        ContestService.update_contest(contest_id,updatedData)
+        return JSONResponse({"message":"success"},status_code=200)
+    except Exception as e:
+        return JSONResponse({"message":e},status_code=200)
 @router.delete("/delete/{contest_id}")
 async def delete_contest(contest_id:str):
     try:
