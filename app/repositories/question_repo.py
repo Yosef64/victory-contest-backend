@@ -15,7 +15,7 @@ class QuestionRepository:
     @staticmethod
     def add_question(data):
         question_id = str(uuid4()).replace("-", "")
-        QUESTION_REF.document(question_id).set(data)
+        QUESTION_REF.document(question_id).set({**data,"id":question_id})
         return question_id
 
     @staticmethod
