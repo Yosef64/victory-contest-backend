@@ -27,7 +27,7 @@ async def get_student_by_id(request:Request,student_id:str):
         student = StudentService.get_student_by_id(student_id)
         return JSONResponse({"student":student},status_code=200)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+        return JSONResponse({"message":e},status_code=500,)
 
 @router.put("/{student_id}", response_model=dict)
 async def update_student(request:Request):
