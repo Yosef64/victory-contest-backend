@@ -7,8 +7,8 @@ class StudentRepository:
     @staticmethod
     def add_student(student):
         """Adds a new student to Firestore."""
-        student_id = student.telegram_id
-        STUDENT_REF.document(student_id).set(student.model_dump())
+        student_id = student["telegram_id"]
+        STUDENT_REF.document(student_id).set(student)
         return {"message": "Student added successfully"}
     @staticmethod 
     def update_student(student):
@@ -26,7 +26,7 @@ class StudentRepository:
     @staticmethod
     def get_students():
         """Fetches all student Telegram IDs from Firestore."""
-        return [doc.id for doc in STUDENT_REF.stream()]
+        return [doc.to_dict() for doc in STUDENT_REF.stream()]
 
     @staticmethod
     def get_student_by_id(student_id: str):

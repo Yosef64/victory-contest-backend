@@ -11,7 +11,7 @@ if base64_key:
     cred = credentials.Certificate(firebase_key_json)
     
 else:
-    raise ValueError("FIREBASE_KEY_BASE64 environment variable not set")
+    cred = credentials.Certificate("app/db/key.json")
 
 firebase_admin.initialize_app(cred)
 

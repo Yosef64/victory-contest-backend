@@ -8,8 +8,13 @@ router = APIRouter()
 @router.post("/", response_model=dict)
 async def add_student(request:Request):
     data = await request.json()
-    student = data["student"]
-    return StudentService.add_student(student)
+    print(data)
+    try:
+        student = data["student"]
+        StudentService.add_student(student)
+        return JSONResponse({"message":"success"},status_code=200)
+    except Exception as e:
+        return JSONResponse({"message":e},status_code=200)
 
 @router.get("/", response_model=dict)
 def get_students():

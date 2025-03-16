@@ -5,29 +5,35 @@ import requests
 from app.repositories.student_repo import StudentRepository
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+BASE_URL = f"https://api.telegram.org/bot7897490261:AAFMKWSSK0wHuSHlROpQH5WW9v4VsSTlkoA/sendPhoto"
 
 
 class TelegramBot:
     @staticmethod
-    def send_message(chat_id: str,contest):
+    def send_message(chat_id: str,contest,imgurl):
         """Sends a message with an inline button to a user."""
+
         data = {
             "chat_id": chat_id,
-            "text": "Click the button below:",
+            "parse_mode": "Markdown", 
+            "photo":imgurl,
+            "caption":f"#{contest["title"]}\n{contest["description"]}",
             "reply_markup": json.dumps({
                 "inline_keyboard": [
-                    [{"text": "Join", "url": "https://example.com"}]
+                    [{"text": "Join", "web_app":{"url": "https://example.com"}}]
                 ]
             })
         }
+        print(BASE_URL)
+        
         response = requests.post(BASE_URL, data=data)
         return response.json()
 
     @staticmethod
-    def send_message_to_all(contest):
+    def send_message_to_all(contest,imgurl):
         """Fetches all student telegram IDs and sends a message to each."""
         students = StudentRepository.get_students()
         for st in students:
-            TelegramBot.send_message(st.telegram_id,contest)
+            tele_id = st["telegram_id"] if "telegram_id" in st else "1656463485"
+            TelegramBot.send_message(tele_id,contest,imgurl)
            

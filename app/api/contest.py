@@ -64,9 +64,9 @@ async def delete_contest(contest_id:str):
 @router.post("/announce")
 async def anounceContest(request:Request):
     data = await request.json()
-    contest = data["contest"]
+    contest , imgurl = data["contest"], data["imgurl"]
     try:
-        TelegramBot.send_message_to_all(contest)
+        TelegramBot.send_message_to_all(contest,imgurl)
         return JSONResponse({"message":"success"},status_code=200)
     except Exception as e:
         return JSONResponse({"message":e},status_code=500)
