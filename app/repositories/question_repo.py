@@ -4,7 +4,9 @@ from uuid import uuid4
 class QuestionRepository:
     @staticmethod
     def get_questions():
-        return [doc.to_dict() for doc in QUESTION_REF.stream()]
+        return [
+    doc.to_dict() if "id" in doc.to_dict() else {**doc.to_dict(), "id": doc.id} 
+    for doc in QUESTION_REF.stream()]
     
     @staticmethod
     def add_questions(questions):
