@@ -1,13 +1,26 @@
 from app.db.firebase import SUBMISSION_REF, STUDENT_REF,WRONG_ANSWER_REF
 from google.cloud.firestore import FieldFilter
 from uuid import uuid4
-
+from app.repositories.date import DateService
 
 class SubmissionRepository:
     @staticmethod
     def get_all_submissions():
         return [doc.to_dict() for doc in SUBMISSION_REF.stream()]
     
+    @staticmethod
+    def get_by_range(start_time,end_time):
+
+        query = SUBMISSION_REF.where("submission_time", ">=", start_time)\
+                            .where("submission_time", "<=", end_time)
+        docs = query.stream()
+
+        submissions = []
+        for doc in docs:
+            submissions.append({"id": doc.id, **doc.to_dict()})
+
+        return submissions
+
     @staticmethod
     def get_submissions_with_student_info():
         students = {stud.id: stud.to_dict() for stud in STUDENT_REF.stream()}
@@ -33,8 +46,8 @@ class SubmissionRepository:
     @staticmethod
     def save_submission(submission_data: dict):
      
-        doc_ref = SUBMISSION_REF.document()  # Auto-generates a unique ID
-        submission_data["submission_id"] = doc_ref.id  # Add generated ID to data
+        doc_ref = SUBMISSION_REF.document()  
+        submission_data["submission_id"] = doc_ref.id 
         
         doc_ref.set(submission_data)
         

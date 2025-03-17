@@ -19,8 +19,6 @@ async def get_contest_by_id(request:Request,contest_id):
    
     try:
         contest = ContestService.get_contest_by_id(contest_id)
-        if not contest:
-            return JSONResponse({"message":"contest not found"},status_code=404, detail="Contest not found")
         return JSONResponse({"contest": contest},status_code=200)
     except Exception as e:
         return JSONResponse({"message":e},status_code=500)

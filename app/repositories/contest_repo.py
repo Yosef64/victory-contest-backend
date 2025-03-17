@@ -9,7 +9,7 @@ class ContestRepository:
     @staticmethod
     def get_contest_by_id(contest_id):
         ref = CONTEST_REF.document(contest_id).get()
-        return ref.to_dict() if ref.exists else None
+        return ref.to_dict() if ref.exists else {}
 
     @staticmethod
     def add_contest(data):
