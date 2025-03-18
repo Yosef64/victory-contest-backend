@@ -58,7 +58,7 @@ async def get_grades_and_schools():
     except Exception as e:
         return JSONResponse({"message":e},status_code=500)
 
-@router.post("/submission", response_model=dict)
+@router.post("/", response_model=dict)
 async def submit_submission(request:Request):
     data = await request.json()
     submission = data["submission"]
