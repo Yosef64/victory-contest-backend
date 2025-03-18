@@ -33,5 +33,5 @@ class StudentRepository:
         """Fetches a student by ID."""
         student_doc = STUDENT_REF.document(student_id).get()
         if not student_doc.exists:
-            return None
+            return {}
         return student_doc.to_dict()

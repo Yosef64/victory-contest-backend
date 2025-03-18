@@ -8,7 +8,7 @@ router = APIRouter()
 @router.post("/", response_model=dict)
 async def add_student(request:Request):
     data = await request.json()
-    print(data)
+  
     try:
         student = data["student"]
         StudentService.add_student(student)
@@ -18,7 +18,7 @@ async def add_student(request:Request):
 
 @router.get("/", response_model=dict)
 def get_students():
-    students = StudentService.fetch_students()
+    students = StudentService.get_students()
     return JSONResponse({"message":students},status_code=200)
 
 @router.get("/{student_id}", response_model=dict)

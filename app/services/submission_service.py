@@ -33,11 +33,10 @@ class SubmissionService:
     @staticmethod
     def create_submission(submission):
        
-        submission = {**submission,"submission_time":firestore.SERVER_TIMESTAMP}
         
-        response, status_code = SubmissionRepository.save_submission(submission)
+        response = SubmissionRepository.save_submission(submission)
 
-        return response, status_code
+        return response
     @staticmethod
     def get_submissions_by_contest(contest_id):
         submission = SubmissionRepository.get_submissions_by_contest(contest_id)

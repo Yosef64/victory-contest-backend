@@ -38,7 +38,6 @@ async def reschedule_contest(request:Request):
     data = await request.json()
     contest_id, contest = data["contest_id"],data["contest"]
     try:
-
         ContestService.update_contest(contest_id, contest)
         return JSONResponse({"message": "success"},status_code=200)
     except Exception as e:

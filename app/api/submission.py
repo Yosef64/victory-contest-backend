@@ -63,7 +63,7 @@ async def submit_submission(request:Request):
     data = await request.json()
     submission = data["submission"]
     try:
-        response, status_code = SubmissionService.create_submission(submission)
+        response = SubmissionService.create_submission(submission)
         return JSONResponse({"message":response},status_code=200)
     except Exception as e:
         return JSONResponse({"message":e},status_code=500)
