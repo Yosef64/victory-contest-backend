@@ -20,3 +20,7 @@ class QuestionService:
     @staticmethod
     def delete_question(question_id):
         return QuestionRepository.delete_question(question_id)
+
+    @staticmethod
+    def get_missed_questions(telegram_id: str):
+        return QuestionRepository.get_missed_questions(telegram_id)

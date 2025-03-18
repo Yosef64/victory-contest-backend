@@ -47,3 +47,9 @@ async def delete_question(request):
         return JSONResponse({"message": "success"},status_code=200)
     except Exception as e:
         raise JSONResponse({"message":e},status_code=500, detail=str(e))
+
+
+@router.get("/missed-questions/{telegram_id}")
+async def get_missed_questions(telegram_id: str):
+    missed_questions = QuestionService.get_missed_questions(telegram_id)
+    return JSONResponse({"missed_questions": missed_questions}, status_code=200)
