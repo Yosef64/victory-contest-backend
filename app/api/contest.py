@@ -61,7 +61,7 @@ async def delete_contest(contest_id:str):
 @router.post("/announce")
 async def anounceContest(request:Request):
     data = await request.json()
-    contest , data = data["contest"], data["data"]
+    contest , data = data["contest"], data["announceData"]
     try:
         TelegramBot.send_message_to_all(contest,data)
         return JSONResponse({"message":"success"},status_code=200)

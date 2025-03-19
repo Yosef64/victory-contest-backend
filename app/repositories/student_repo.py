@@ -12,7 +12,8 @@ class StudentRepository:
         return {"message": "Student added successfully"}
     @staticmethod 
     def update_student(student):
-        STUDENT_REF.document(student.telegram_id).set(student)
+        telegram_id = student["telegram_id"]
+        STUDENT_REF.document(telegram_id).set(student)
         return {"message": "Student added successfully"}
     @staticmethod
     def verify_student_paid(telegram_id):
