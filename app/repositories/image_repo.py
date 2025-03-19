@@ -1,10 +1,12 @@
 import cloudinary
 import cloudinary.uploader
-
+CLOUD_NAME = "dud4t1ptn"
+CLOUD_KEY = "782296869627567"
+CLOUD_SECRET = "yQkh1vfEsaktbElrk5h1H7Ky2ug"
 cloudinary.config(
-    cloud_name="dud4t1ptn",  
-    api_key="782296869627567", 
-    api_secret="yQkh1vfEsaktbElrk5h1H7Ky2ug", 
+    cloud_name=CLOUD_NAME,  
+    api_key=CLOUD_KEY, 
+    api_secret=CLOUD_SECRET, 
 )
 
 class Image:
