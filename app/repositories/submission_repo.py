@@ -64,3 +64,4 @@ class SubmissionRepository:
     def put_wrong_answers(data):
         ref = WRONG_ANSWER_REF.document(data["user_id"])
         ref.update({})
+        
