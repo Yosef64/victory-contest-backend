@@ -1,8 +1,10 @@
 import cloudinary
 import cloudinary.uploader
-CLOUD_NAME = "dud4t1ptn"
-CLOUD_KEY = "782296869627567"
-CLOUD_SECRET = "yQkh1vfEsaktbElrk5h1H7Ky2ug"
+import os
+CLOUD_NAME = os.getenv("CLOUD_NAME")
+CLOUD_KEY = os.getenv("CLOUD_KEY")
+CLOUD_SECRET = os.getenv("CLOUD_SECRET")
+
 cloudinary.config(
     cloud_name=CLOUD_NAME,  
     api_key=CLOUD_KEY, 
