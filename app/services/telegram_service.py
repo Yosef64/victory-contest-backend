@@ -5,7 +5,7 @@ import requests
 from app.repositories.student_repo import StudentRepository
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-BASE_URL = f"https://api.telegram.org/bot7897490261:AAFMKWSSK0wHuSHlROpQH5WW9v4VsSTlkoA/sendPhoto"
+BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
 CONTEST_URL = os.getenv("CONTEST_URL")
 
 class TelegramBot:
