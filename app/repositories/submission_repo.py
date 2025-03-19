@@ -50,7 +50,6 @@ class SubmissionRepository:
         doc_ref = SUBMISSION_REF.document()  
         submission_data["submission_time"] = datetime.utcnow()
         submission_data["submission_id"] = doc_ref.id 
-        
         doc_ref.set(submission_data)
         
         return {"message": "success"}
@@ -59,6 +58,7 @@ class SubmissionRepository:
     def get_submissions_by_contest(contest_id):
         docs = SUBMISSION_REF.where(filter=FieldFilter("contest_id", "==", contest_id)).stream()
         submissions = [doc.to_dict() for doc in docs]
+        print(submissions)
         return submissions
     @staticmethod
     def put_wrong_answers(data):
