@@ -15,7 +15,7 @@ class Image:
 
     @staticmethod
     def upload_image(file,upload_options):
-        print(upload_options)
+        print(upload_options,CLOUD_KEY)
         upload_response = cloudinary.uploader.upload(file=file, **upload_options)
         return upload_response
     @staticmethod
