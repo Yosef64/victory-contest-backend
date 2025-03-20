@@ -9,6 +9,7 @@ cloudinary.config(
     cloud_name=CLOUD_NAME,  
     api_key=CLOUD_KEY, 
     api_secret=CLOUD_SECRET, 
+    secure=True,
 )
 
 class Image:
@@ -16,7 +17,7 @@ class Image:
     @staticmethod
     def upload_image(file,upload_options):
         print(upload_options,CLOUD_KEY)
-        upload_response = cloudinary.uploader.upload(file=file, **upload_options)
+        upload_response = cloudinary.uploader.upload(file=file, public_id=upload_options["public_id"])
         return upload_response
     @staticmethod
     def delete_image(public_id):
