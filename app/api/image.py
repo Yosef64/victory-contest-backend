@@ -14,10 +14,8 @@ async def upload_image(file:UploadFile=File(...), public_id:str=Form(None)):
     upload_options = {"public_id": public_id} if public_id else {}
     try:
         upload_response = Image.upload_image(contents, upload_options )
-        print(upload_options)
         return JSONResponse({"message":upload_response},status_code=200)
     except Exception as e:
-        print(e)
         return JSONResponse({"message":e},status_code=500)
 @router.post("/delete")
 async def delete_image(request:Request):

@@ -24,7 +24,6 @@ class TelegramBot:
                 ]
             })
         }
-        print(BASE_URL)
         
         response = requests.post(BASE_URL, data=data)
         return response.json()

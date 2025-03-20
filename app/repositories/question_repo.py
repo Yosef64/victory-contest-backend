@@ -61,5 +61,4 @@ class QuestionRepository:
 
             return structured_data
         except Exception as e:
-            print(f"🔥 Database error: {e}")
             return {}

@@ -32,8 +32,6 @@ class SubmissionService:
     
     @staticmethod
     def create_submission(submission):
-       
-        
         response = SubmissionRepository.save_submission(submission)
 
         return response
