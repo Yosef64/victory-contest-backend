@@ -27,3 +27,6 @@ class StudentService:
     @staticmethod
     def get_student_by_id(student_id: str):
         return StudentRepository.get_student_by_id(student_id)
+    @staticmethod
+    def get_quick_stat(student_id):
+        return StudentRepository.get_quick_stat(student_id)

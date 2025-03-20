@@ -58,4 +58,11 @@ async def get_paid_students(request:Request):
 
     return JSONResponse({"message":response_data},status_code=200)  # Successfully return students
 
-
+@router.get("/quickstat/{student_id}")
+async def get_quick_stat(request:Request,student_id:str):
+    try:
+        stat = StudentService.get_quick_stat(student_id)
+        return JSONResponse({"stat":stat},status_code=200)
+    except Exception as e:
+        return JSONResponse({"message":e},status_code=500,)
+    

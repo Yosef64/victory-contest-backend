@@ -1,9 +1,8 @@
 from app.db.firebase import QUESTION_REF,SUBMISSION_REF
 from uuid import uuid4
 from datetime import datetime, timedelta
-import pytz
 from google.cloud import firestore
-
+import pytz
 class QuestionRepository:
     @staticmethod
     def get_questions():
@@ -37,8 +36,7 @@ class QuestionRepository:
     @staticmethod
     def get_missed_questions(student_id: str):
         try:
-            # Use 'filter=' in 'where()' to prevent warnings
-            query = SUBMISSION_REF.where("student.Student_id", "==", student_id)
+            query = SUBMISSION_REF.where("student.student_id", "==", student_id)
             docs = list(query.stream())
 
             if not docs:
@@ -56,10 +54,8 @@ class QuestionRepository:
                     subject = q["subject"]
                     chapter_key = f"Chapter_{q['chapter']}"
 
-                    # Use setdefault() for cleaner nested dictionary initialization
                     structured_data.setdefault(grade, {}).setdefault(subject, {}).setdefault(chapter_key, 0)
 
-                    # Increment missed question count
                     structured_data[grade][subject][chapter_key] += 1
 
             return structured_data
@@ -87,9 +83,9 @@ class QuestionRepository:
 
             # Fetch submissions from the current week
             query = (
-                            SUBMISSION_REF
-                            .where(filter=firestore.FieldFilter("student.Student_id", "==", student_id))
-                            .where(filter=firestore.FieldFilter("submission_time", ">=", firestore_monday))
+                    SUBMISSION_REF
+                    .where(filter=firestore.FieldFilter("student.Student_id", "==", student_id))
+                    .where(filter=firestore.FieldFilter("submission_time", ">=", firestore_monday))
                         )
             docs = list(query.stream())
 
@@ -107,17 +103,13 @@ class QuestionRepository:
                     grade = f"Grade_{q['grade']}"
                     subject = q["subject"]
                     chapter_key = f"Chapter_{q['chapter']}"
-
-                    # Use setdefault() for cleaner nested dictionary initialization
                     structured_data.setdefault(grade, {}).setdefault(subject, {}).setdefault(chapter_key, 0)
 
-                    # Increment missed question count
                     structured_data[grade][subject][chapter_key] += 1
 
             return structured_data
 
         except Exception as e:
-            print(f"🔥 Database error: {e}")
             return {"missed_questions": {}}
         
 

@@ -1,6 +1,8 @@
 from app.db.firebase import db
 from app.schemas.student import StudentCreate, StudentUpdate
 from google.cloud.firestore import FieldFilter
+from app.repositories.submission_repo import SUBMISSION_REF
+
 STUDENT_REF = db.collection("students")
 
 class StudentRepository:
@@ -36,3 +38,13 @@ class StudentRepository:
         if not student_doc.exists:
             return {}
         return student_doc.to_dict()
+    @staticmethod
+    def get_quick_stat(student_id):
+        submissions = SUBMISSION_REF.where(filter=FieldFilter("student.student_id","==",student_id)).stream()
+        submissions = [submission.to_dict() for submission in submissions]
+        total_time = sum(submission["time_spend"] for submission in submissions)
+        total_points = sum(submission["score"] for submission in submissions)
+        quick_stat = {"time": total_time,"contests": len(submissions),"points": total_points}
+        return quick_stat
+
+
