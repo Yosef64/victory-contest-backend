@@ -1,4 +1,4 @@
-from app.db.firebase import CONTEST_REF, SUBMISSION_REF, STUDENT_REF
+from app.db.firebase import CONTEST_REF, SUBMISSION_REF, STUDENT_REF,REGISTERED__REF
 from uuid import uuid4
 
 class ContestRepository:
@@ -10,6 +10,23 @@ class ContestRepository:
     def get_contest_by_id(contest_id):
         ref = CONTEST_REF.document(contest_id).get()
         return ref.to_dict() if ref.exists else {}
+    @staticmethod
+    def get_number_of_participants(contest_id):
+        contest = REGISTERED__REF.document(contest_id).get()
+        if not contest.exists:
+            return 0
+        return len(contest.to_dict().get("registered", []))
+    @staticmethod
+    def register_contest(contest_id,student_id):
+        contest = REGISTERED__REF.document(contest_id).get()
+        if not contest.exists:
+            CONTEST_REF.document(contest_id).set({"registered": [student_id],"active_contestant": []})
+            return True
+        contest = contest.to_dict()
+        
+        contest["registered"].append(student_id)
+        CONTEST_REF.document(contest_id).update({"registered": contest["registered"]})
+        return True
 
     @staticmethod
     def add_contest(data):

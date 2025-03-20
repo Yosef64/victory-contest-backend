@@ -8,6 +8,12 @@ class ContestService:
     @staticmethod
     def get_contest_by_id(contest_id):
         return ContestRepository.get_contest_by_id(contest_id)
+    @staticmethod
+    def get_number_of_participants(contest_id):
+        return ContestRepository.get_number_of_participants(contest_id)
+    @staticmethod
+    def register_contest(contest_id,student_id):
+        return ContestRepository.register_contest(contest_id,student_id)
 
     @staticmethod
     def add_contest(data):
