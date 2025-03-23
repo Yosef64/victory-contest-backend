@@ -20,7 +20,7 @@ class TelegramBot:
             "caption":f"{data["message"]}",
             "reply_markup": json.dumps({
                 "inline_keyboard": [
-                    [{"text": "🔥 Join 🔥", "web_app":{"url": f"{CONTEST_URL}/{contest.id}?tele_id={chat_id}"}}]
+                    [{"text": "🔥 Join 🔥", "web_app":{"url": f"{CONTEST_URL}/{contest["id"]}?tele_id={chat_id}"}}]
                 ]
             })
         }
