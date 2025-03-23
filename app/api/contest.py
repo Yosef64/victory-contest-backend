@@ -71,6 +71,7 @@ async def anounceContest(file: UploadFile = File(...),
         TelegramBot.send_message_to_all(contest_data,message,contents)
         return JSONResponse({"message":"success"},status_code=200)
     except Exception as e:
+        print(e)
         return JSONResponse({"message":e},status_code=500)
     
 @router.post("/register")
