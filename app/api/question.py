@@ -36,6 +36,7 @@ async def update_question(request:Request):
         QuestionService.update_question(question)
         return JSONResponse({"message": "success"},status_code=200)
     except Exception as e:
+        print(e)
         raise JSONResponse({"message":e},status_code=500, detail=str(e))
 
 @router.delete("/deletequestion/{question_id}")
