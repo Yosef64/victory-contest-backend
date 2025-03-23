@@ -11,6 +11,10 @@ class ContestService:
     @staticmethod
     def get_number_of_participants(contest_id):
         return ContestRepository.get_number_of_participants(contest_id)
+    
+    @staticmethod
+    def get_active_contestants(contest_id):
+        return ContestRepository.get_active_contestants(contest_id)
     @staticmethod
     def register_contest(contest_id,student_id):
         return ContestRepository.register_contest(contest_id,student_id)

@@ -72,6 +72,7 @@ async def anounceContest(request:Request):
 async def register_contest(request:Request):
     data = await request.json()
     contest_id, student_id = data["contest_id"], data["tele_id"]
+    print(contest_id,student_id)
     try:
         ContestService.register_contest(contest_id,student_id)
         return JSONResponse({"message":"success"},status_code=200)
@@ -85,6 +86,12 @@ async def get_participants(contest_id:str):
         return JSONResponse({"participants":participants},status_code=200)
     except Exception as e:
         return JSONResponse({"message":e},status_code=500)
-
+@router.get("/active/{contest_id}")
+async def get_active_contestants(request:Request,contest_id:str):
+    try:
+        active_contestants = ContestService.get_active_contestants(contest_id)
+        return JSONResponse({"active_contestants":active_contestants},status_code=200)
+    except Exception as e:
+        return JSONResponse({"message":e},status_code=500)
 
 

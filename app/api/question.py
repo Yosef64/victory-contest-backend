@@ -28,19 +28,18 @@ async def addQuestions(request:Request):
     except Exception as e:
         return JSONResponse({"message":e},status_code=500)
 @router.put("/updatequestion/{question_id}")
-async def update_question(request):
+async def update_question(request:Request):
     data = await request.json()
     question = data["question"]
+    print(question)
     try:
-        QuestionService.update_question(question.dict(exclude_none=True))
+        QuestionService.update_question(question)
         return JSONResponse({"message": "success"},status_code=200)
     except Exception as e:
         raise JSONResponse({"message":e},status_code=500, detail=str(e))
 
 @router.delete("/deletequestion/{question_id}")
-async def delete_question(request):
-    data = await request.json()
-    question_id = data["question_id"]
+async def delete_question(request:Request,question_id:str):
     try:
         QuestionService.delete_question(question_id)
         return JSONResponse({"message": "success"},status_code=200)

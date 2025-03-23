@@ -14,18 +14,25 @@ class ContestRepository:
     def get_number_of_participants(contest_id):
         contest = REGISTERED__REF.document(contest_id).get()
         if not contest.exists:
-            return 0
-        return len(contest.to_dict().get("registered", []))
+            return []
+        return contest.to_dict()["registered"]
+    @staticmethod
+    def get_active_contestants(contest_id):
+        contest = REGISTERED__REF.document(contest_id).get()
+        if not contest.exists:
+            return []
+        return contest.to_dict()["active_contestant"]
     @staticmethod
     def register_contest(contest_id,student_id):
         contest = REGISTERED__REF.document(contest_id).get()
+        print(f"student_id : {student_id}",f"contest_id : {contest_id}")
         if not contest.exists:
-            CONTEST_REF.document(contest_id).set({"registered": [student_id],"active_contestant": []})
+            REGISTERED__REF.document(contest_id).set({"registered": [student_id],"active_contestant": []})
             return True
         contest = contest.to_dict()
-        
+        print(contest)
         contest["registered"].append(student_id)
-        CONTEST_REF.document(contest_id).update({"registered": contest["registered"]})
+        REGISTERED__REF.document(contest_id).update({"registered": contest["registered"]})
         return True
 
     @staticmethod
