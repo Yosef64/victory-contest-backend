@@ -16,8 +16,8 @@ class TelegramBot:
         data = {
             "chat_id": chat_id,
             "parse_mode": "Markdown", 
-            "photo":data.imgurl,
-            "caption":f"{data.message}",
+            "photo":data["imgurl"],
+            "caption":f"{data["message"]}",
             "reply_markup": json.dumps({
                 "inline_keyboard": [
                     [{"text": "🔥 Join 🔥", "web_app":{"url": f"{CONTEST_URL}/{contest.id}?tele_id={chat_id}"}}]
