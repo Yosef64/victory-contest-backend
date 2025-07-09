@@ -7,6 +7,12 @@ from app.api.question import router as question_router
 from app.api.students import router as student_router 
 from app.api.image import router as image_router
 from app.api.admin import router as admin_router
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 app = FastAPI()
 
 #cors origin
