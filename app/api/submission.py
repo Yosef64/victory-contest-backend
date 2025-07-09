@@ -27,7 +27,7 @@ async def get_for_week(request:Request):
         return JSONResponse({"message":e},status_code=500)
 
 @router.get("/month")
-async def get_for_week(request:Request):
+async def get_for_month(request:Request):
     try:
         submissions = SubmissionService.get_for_month()
         return JSONResponse({"submissions":submissions},status_code=200)

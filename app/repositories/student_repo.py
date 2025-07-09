@@ -1,8 +1,9 @@
+from starlette.background import P
 from app.db.firebase import db
 from app.schemas.student import StudentCreate, StudentUpdate
 from google.cloud.firestore import FieldFilter
-from app.repositories.submission_repo import SUBMISSION_REF
-
+from app.repositories.submission_repo import SUBMISSION_REF, SubmissionRepository
+from app.repositories.payment_repo import PaymentRepository
 STUDENT_REF = db.collection("students")
 
 class StudentRepository:
@@ -20,7 +21,10 @@ class StudentRepository:
     @staticmethod
     def verify_student_paid(telegram_id):
         student = STUDENT_REF.document(telegram_id).get()
-        return {"paid":student["paid"]}
+        if student.exists:
+            st = student.to_dict()
+            return {"paid":st["paid"] if st else False}
+        return {"paid":False}
     @staticmethod
     def get_paid_students():
         students = STUDENT_REF.where(filter=FieldFilter("paid","==",True))
@@ -29,7 +33,14 @@ class StudentRepository:
     @staticmethod
     def get_students():
         """Fetches all student Telegram IDs from Firestore."""
-        return [doc.to_dict() for doc in STUDENT_REF.stream()]
+        payments = PaymentRepository.get_payments()
+        students = []
+        for doc in STUDENT_REF.stream():
+            student_data = doc.to_dict()
+            student_data["telegram_id"] = doc.id
+            student_data["payment"] = payments.get(doc.id, None)
+            students.append(student_data)
+        return students
 
     @staticmethod
     def get_student_by_id(student_id: str):
@@ -46,5 +57,37 @@ class StudentRepository:
         total_points = sum(submission["score"] for submission in submissions)
         quick_stat = {"time": total_time,"contests": len(submissions),"points": total_points}
         return quick_stat
+
+    @staticmethod
+    def get_student_rankings():
+        students = StudentRepository.get_students()
+        submissions = SubmissionRepository.get_structured_submissions()
+        rankings = []
+        for student in students:
+            student_id = student.get("telegram_id")
+            stud_submission = submissions[student_id]
+            total_points = SubmissionRepository.calculate_points(stud_submission)
+            rankings.append({
+                "telegram_id": student_id,
+                "name": student.get("name"),
+                "total_points": total_points
+            })
+        # Sort by total_points descending
+        rankings.sort(key=lambda x: x["total_points"], reverse=True)
+        # Add rank
+        for idx, student in enumerate(rankings, start=1):
+            student["rank"] = idx
+        return rankings
+    @staticmethod
+    def get_grades_and_schools():
+        grades = {"schools": set(), "grades": set()}
+        for doc in STUDENT_REF.stream():
+            student = doc.to_dict()
+            if student.get("grade"):
+                grades["grades"].add(student["grade"])
+            if student.get("school"):
+                grades["schools"].add(student["school"])
+        return {"grades": list(grades["grades"]), "schools": list(grades["schools"])}
+    
 
 

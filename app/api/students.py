@@ -21,26 +21,6 @@ def get_students():
     students = StudentService.get_students()
     return JSONResponse({"message":students},status_code=200)
 
-@router.get("/{student_id}", response_model=dict)
-async def get_student_by_id(request:Request,student_id:str):
-    try:
-        student = StudentService.get_student_by_id(student_id)
-        return JSONResponse({"student":student},status_code=200)
-    except Exception as e:
-        return JSONResponse({"message":e},status_code=500,)
-
-@router.put("/{student_id}", response_model=dict)
-async def update_student(request:Request):
-    data = await request.json()
-    student = data["student"]
-    StudentService.update_student(student)
-    return JSONResponse({"message":"ok"},status_code=200)
-
-@router.get("/{student_id}/paid", response_model=dict)
-async def check_student_paid(request:Request):
-    data = await request.json()
-    status = StudentService.verify_student_paid(data["telegram_id"])
-    return JSONResponse({"message":status},status_code=200)
 
 @router.get("/paid", response_model=dict)
 async def get_paid_students(request:Request):
@@ -65,4 +45,30 @@ async def get_quick_stat(request:Request,student_id:str):
         return JSONResponse({"stat":stat},status_code=200)
     except Exception as e:
         return JSONResponse({"message":e},status_code=500,)
+
+@router.get("/rank", response_model=dict)
+async def get_student_rankings():
+    rankings = StudentService.get_student_rankings()
+    return JSONResponse({"rankings": rankings}, status_code=200)
     
+
+@router.get("/{student_id}", response_model=dict)
+async def get_student_by_id(request:Request,student_id:str):
+    try:
+        student = StudentService.get_student_by_id(student_id)
+        return JSONResponse({"student":student},status_code=200)
+    except Exception as e:
+        return JSONResponse({"message":e},status_code=500,)
+
+@router.put("/{student_id}", response_model=dict)
+async def update_student(request:Request):
+    data = await request.json()
+    student = data["student"]
+    StudentService.update_student(student)
+    return JSONResponse({"message":"ok"},status_code=200)
+
+@router.get("/{student_id}/paid", response_model=dict)
+async def check_student_paid(request:Request):
+    data = await request.json()
+    status = StudentService.verify_student_paid(data["telegram_id"])
+    return JSONResponse({"message":status},status_code=200)

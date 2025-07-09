@@ -3,6 +3,7 @@ from app.db.firebase import SUBMISSION_REF, STUDENT_REF,WRONG_ANSWER_REF
 from google.cloud.firestore import FieldFilter
 from uuid import uuid4
 from app.repositories.date import DateService
+from collections import defaultdict
 
 class SubmissionRepository:
     @staticmethod
@@ -32,21 +33,8 @@ class SubmissionRepository:
             if student:
                 submissions.append({**student, **submission})
         return submissions
-
-    @staticmethod
-    def get_grades_and_schools():
-        grades = {"schools": set(), "grades": set()}
-        for doc in STUDENT_REF.stream():
-            student = doc.to_dict()
-            if student.get("grade"):
-                grades["grades"].add(student["grade"])
-            if student.get("school"):
-                grades["schools"].add(student["school"])
-        return {"grades": list(grades["grades"]), "schools": list(grades["schools"])}
-    
     @staticmethod
     def save_submission(submission_data: dict):
-     
         doc_ref = SUBMISSION_REF.document()  
         submission_data["submission_time"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
         submission_data["submission_id"] = doc_ref.id 
@@ -63,4 +51,26 @@ class SubmissionRepository:
     def put_wrong_answers(data):
         ref = WRONG_ANSWER_REF.document(data["user_id"])
         ref.update({})
+    @staticmethod
+    def get_user_submission(user_id):
+        query = SUBMISSION_REF.where("student_id", "==", user_id)
+        docs = query.stream()
+        submissions = [doc.to_dict() for doc in docs]
+        return submissions
+    @staticmethod
+    def get_structured_submissions():
+        submissions = defaultdict(list)
+        for doc in SUBMISSION_REF.stream():
+            submission = doc.to_dict()
+            st_id = submission["student"]["student_id"]
+            if st_id:
+                submissions[st_id].append(submission)
+            
+        return submissions
+    @staticmethod
+    def calculate_points(submissions):
+        total_points = 0
+        for submission in submissions:
+            total_points += submission["score"]
+        return total_points
         
