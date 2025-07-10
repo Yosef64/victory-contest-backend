@@ -72,3 +72,8 @@ async def check_student_paid(request:Request):
     data = await request.json()
     status = StudentService.verify_student_paid(data["telegram_id"])
     return JSONResponse({"message":status},status_code=200)
+
+@router.get("/profile/{student_id}", response_model=dict)
+def get_user_profile(request:Request,student_id:str):
+    user = StudentService.get_user_profile(student_id)
+    return JSONResponse({"user": user}, status_code=200)
