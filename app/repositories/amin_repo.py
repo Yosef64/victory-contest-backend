@@ -9,11 +9,9 @@ class AdminRepository:
         if not admin.exists:
             return None 
 
-        admin_data = admin.to_dict()
+        admin_data = admin.to_dict() or {}
         hashed_password = admin_data["password"] 
-        isApproved = admin_data["isApproved"] 
-        print(password==hashed_password)
-        
+        isApproved = admin_data["isApproved"]         
         if password != hashed_password or not isApproved:
             return {"isApproved":isApproved,"auth":password == hashed_password}  
         
