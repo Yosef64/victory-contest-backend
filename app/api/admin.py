@@ -60,6 +60,11 @@ async def login_admin(request:Request):
     except Exception as e:
         return JSONResponse({"message":str(e)},status_code=500)
 
+@router.get("/logout")
+async def logout_admin():
+    response = JSONResponse({"message": "Logged out successfully"})
+    response.delete_cookie("access_token", path="/")
+    return response
 @router.post("/register")
 async def register_admin(request:Request):
     data = await request.json()
