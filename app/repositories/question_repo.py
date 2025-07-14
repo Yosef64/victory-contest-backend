@@ -1,4 +1,5 @@
 from app.db.firebase import QUESTION_REF,SUBMISSION_REF
+from app.repositories.image_repo import Image
 from uuid import uuid4
 from datetime import datetime, timedelta
 from google.cloud import firestore
@@ -19,7 +20,38 @@ class QuestionRepository:
     @staticmethod
     def add_question(data):
         question_id = str(uuid4()).replace("-", "")
-        QUESTION_REF.document(question_id).set({**data,"id":question_id})
+        # Handle question image
+        if data.get("question_image"):
+            file = data["question_image"]
+            try:
+                if hasattr(file, "read") or hasattr(file, "file"):
+                    file_bytes = file.file.read() if hasattr(file, "file") else file.read()
+                    res = Image.upload_image(file_bytes, {"public_id": question_id + "-q"})
+                    data["question_image"] = res.get("secure_url") or res.get("url")
+                else:
+                    data["question_image"] = ""
+            except Exception as e:
+                print(f"Error uploading question image: {e}")
+                data["question_image"] = ""
+        else:
+            data["question_image"] = ""
+        # Handle explanation image
+        if data.get("explanation_image"):
+            file = data["explanation_image"]
+            try:
+                if hasattr(file, "read") or hasattr(file, "file"):
+                    file_bytes = file.file.read() if hasattr(file, "file") else file.read()
+                    res = Image.upload_image(file_bytes, {"public_id": question_id + "-e"})
+                    data["explanation_image"] = res.get("secure_url") or res.get("url")
+                else:
+                    data["explanation_image"] = ""
+            except Exception as e:
+                print(f"Error uploading explanation image: {e}")
+                data["explanation_image"] = ""
+        else:
+            data["explanation_image"] = ""
+        QUESTION_REF.document(question_id).set({**data, "id": question_id})
+        print(data)
         return question_id
 
     @staticmethod
@@ -48,7 +80,7 @@ class QuestionRepository:
 
             for doc in docs:
                 submission = doc.to_dict()
-                missed_questions = submission.get("missed_question", [])
+                missed_questions = submission.get("missed_question", []) if submission else []
 
                 for q in missed_questions:
                     grade = f"Grade_{q['grade']}"
@@ -98,7 +130,7 @@ class QuestionRepository:
 
             for doc in docs:
                 submission = doc.to_dict()
-                missed_questions = submission.get("missed_question", [])
+                missed_questions = submission.get("missed_question", []) if submission else []
 
                 for q in missed_questions:
                     grade = f"Grade_{q['grade']}"
@@ -173,7 +205,7 @@ class QuestionRepository:
 
             # Get the first (and only) submission
             submission = docs[0].to_dict()
-            missed_questions = submission.get("missed_question", [])
+            missed_questions = submission.get("missed_question", []) if submission else []
 
             structured_data = {}
 

@@ -16,7 +16,7 @@ class StudentRepository:
     @staticmethod 
     def update_student(student):
         telegram_id = student["telegram_id"]
-        STUDENT_REF.document(telegram_id).set(student)
+        STUDENT_REF.document(telegram_id).update(student)
         return {"message": "Student added successfully"}
     @staticmethod
     def verify_student_paid(telegram_id):
@@ -100,5 +100,24 @@ def get_grades_and_schools():
         "schools": list(grades["schools"]), 
         "cities": list(grades["cities"])
     }
+    @staticmethod
+    def get_user_profile(student_id: str = ""):
+        # Return the first student in the collection, or a default if none exist
+        docs = STUDENT_REF.document(student_id).get()
+        if not docs.exists:
+            raise ValueError("No student found with the provided ID.")
+        student = docs.to_dict() or {}
+        total_user_submissions = SubmissionRepository.get_user_submission(docs.id)
+        total_points = SubmissionRepository.calculate_points(total_user_submissions)
+        payment = PaymentRepository.get_payment_by_student_id(docs.id) or {} 
+        payment_date = payment.get("payment_date","")
+        pay_stat_next = PaymentRepository.calculate_next_payment_status(payment) or {}
+        payment_to_result = {"lastPayment":payment_date,**pay_stat_next}
+        result = {**student}
+        result["totalPoints"] = total_points
+        result["payment"] = payment_to_result
+        result["contestSubmissions"] = total_user_submissions
+        return result
+    
 
 

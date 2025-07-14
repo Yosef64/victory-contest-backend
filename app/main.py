@@ -9,6 +9,12 @@ from app.api.image import router as image_router
 from app.api.admin import router as admin_router
 from app.api.feedback import router as feedback_router # NEW: Import the feedback router
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 app = FastAPI()
 
 #cors origin
@@ -16,7 +22,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173","http://localhost:5174","http://127.0.0.1:5173","http://127.0.0.1:8000","https://victory-contest.vercel.app","https://victory-admin-page.vercel.app"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["*"],  
     )
 
 #initial routes
