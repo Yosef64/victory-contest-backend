@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException,Request
 from fastapi.responses import JSONResponse
 from app.services.student_service import StudentService
 from app.schemas.student import StudentCreate, StudentUpdate
+from app.services.notification_service import NotificationService
+from app.repositories.student_repo import StudentRepository
 
 router = APIRouter()
 
@@ -15,6 +17,41 @@ async def add_student(request:Request):
         return JSONResponse({"message":"success"},status_code=200)
     except Exception as e:
         return JSONResponse({"message":e},status_code=200)
+    # Update your student registration endpoint
+@router.post("/register")
+async def register_student(student: StudentCreate, request: Request):
+    try:
+        # Save student to database
+        student_data = student.dict()
+        StudentService.add_student(student_data)
+        
+        # Create notification for admin
+        notification_msg = f"New student registered: {student_data['name']}"
+        NotificationService.create_notification(
+            user_id="admin",  # Or get admin ID from your system
+            message=notification_msg,
+            notification_type="registration"
+        )
+        
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    try:
+        # Save student to database
+        student_data = student.dict()
+        StudentRepository.add_student(student_data)
+        
+        # Create notification for admin
+        notification_msg = f"New student registered: {student_data['name']}"
+        NotificationService.create_notification(
+            user_id="admin",  # Or specific admin ID
+            message=notification_msg,
+            notification_type="registration"
+        )
+        
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/", response_model=dict)
 def get_students():
@@ -72,6 +109,14 @@ async def check_student_paid(request:Request):
     data = await request.json()
     status = StudentService.verify_student_paid(data["telegram_id"])
     return JSONResponse({"message":status},status_code=200)
+# Add new endpoint for grades and schools
+@router.get("/grades-and-schools")
+async def get_grades_and_schools():
+    try:
+        data = StudentRepository.get_grades_and_schools()
+        return JSONResponse(data, status_code=200)
+    except Exception as e:
+        return JSONResponse({"message": str(e)}, status_code=500)
 
 @router.get("/profile/{student_id}", response_model=dict)
 def get_user_profile(request:Request,student_id:str):

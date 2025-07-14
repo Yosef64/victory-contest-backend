@@ -7,7 +7,7 @@ class ContestSchema(BaseModel):
     start_time: str
     end_time: str
     max_participants: Optional[int] = None
-
+    prize: str
 class ContestUpdateSchema(BaseModel):
     start_time: Optional[str] = None
     end_time: Optional[str] = None

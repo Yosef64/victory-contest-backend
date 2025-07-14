@@ -78,8 +78,7 @@ class StudentRepository:
         for idx, student in enumerate(rankings, start=1):
             student["rank"] = idx
         return rankings
-    @staticmethod
-    def get_grades_and_schools():
+ 
         grades = {"schools": set(), "grades": set()}
         for doc in STUDENT_REF.stream():
             student = doc.to_dict()
@@ -88,7 +87,19 @@ class StudentRepository:
             if student.get("school"):
                 grades["schools"].add(student["school"])
         return {"grades": list(grades["grades"]), "schools": list(grades["schools"])}
-    
+@staticmethod
+def get_grades_and_schools():
+    grades = {"schools": set(), "cities": set()}
+    for doc in STUDENT_REF.stream():
+        student = doc.to_dict()
+        if student.get("school"):
+            grades["schools"].add(student["school"])
+        if student.get("city"):
+            grades["cities"].add(student["city"])
+    return {
+        "schools": list(grades["schools"]), 
+        "cities": list(grades["cities"])
+    }
     @staticmethod
     def get_user_profile(student_id: str = ""):
         # Return the first student in the collection, or a default if none exist
