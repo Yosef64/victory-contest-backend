@@ -6,6 +6,11 @@ class ContestRepository:
     @staticmethod
     def get_all_contests():
         return [doc.to_dict() for doc in CONTEST_REF.stream()]
+    
+    @staticmethod
+    def is_user_registered(contest_id: str, student_id: str):
+        registration = REGISTERED__REF.where("contest_id", "==", contest_id).where("student_id", "==", student_id).get()
+        return registration[0].exists if registration else False
 
     @staticmethod
     def get_contest_by_id(contest_id):
