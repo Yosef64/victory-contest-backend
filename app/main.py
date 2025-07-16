@@ -21,9 +21,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://web.telegram.org",
-        "https://web.telegram.org/k",
-        "https://t.me",
+        "https://7wwb0knl-5173.euw.devtunnels.ms",
+        "https://victory-admin-page.vercel.app",
         "http://localhost:5173" # Optional, depending on how it's opened
     ],
     allow_credentials=True,
