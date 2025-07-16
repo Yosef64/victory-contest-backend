@@ -188,8 +188,7 @@ async def get_past_contests():
 @router.get("/is_registered/{contest_id}/{student_id}")
 async def is_user_registered(contest_id: str, student_id: str):
     try:
-        participants = ContestService.get_number_of_participants(contest_id)
-        registered = student_id in participants
+        registered = ContestService.is_user_registered(contest_id, student_id)
         return JSONResponse({"registered": registered}, status_code=200)
     except Exception as e:
         return JSONResponse({"message": str(e)}, status_code=500)
