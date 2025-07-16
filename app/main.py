@@ -20,10 +20,11 @@ app = FastAPI()
 #cors origin
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","http://localhost:5174","http://127.0.0.1:5173","http://127.0.0.1:8000","https://victory-contest.vercel.app","https://victory-admin-page.vercel.app"],
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  
-    )
+    allow_methods=["*"],          
+    allow_headers=["*"],          
+)
 
 #initial routes
 app.include_router(student_router, prefix="/api/student", tags=["Students"])
