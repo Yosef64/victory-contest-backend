@@ -10,7 +10,7 @@ class ContestService:
         return ContestRepository.get_contest_by_id(contest_id)
     @staticmethod
     def get_number_of_participants(contest_id):
-        return ContestRepository.get_number_of_participants(contest_id)
+        return ContestRepository.get_participants(contest_id)
     
     @staticmethod
     def get_active_contestants(contest_id):
@@ -42,3 +42,14 @@ class ContestService:
     @staticmethod
     def get_grades_and_schools():
         return ContestRepository.get_grades_and_schools()
+
+    @staticmethod
+    def get_active_contests():
+        return ContestRepository.get_active_contests()
+
+    @staticmethod
+    def get_past_contests():
+        return ContestRepository.get_past_contests()
+    @staticmethod
+    def register_user_for_Contest(contest_id: str, student_id: str):
+        return ContestRepository.register_user_for_Contest(contest_id, student_id)

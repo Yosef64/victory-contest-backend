@@ -149,11 +149,10 @@ async def register_contest(request: Request):
     data = await request.json()
     contest_id, student_id = data["contest_id"], data["tele_id"]
     try:
-        ContestService.register_contest(contest_id, student_id)
-        return JSONResponse({"message": "success"}, status_code=200)
+        ContestService.register_user_for_Contest(contest_id, student_id)
+        return JSONResponse({"message":"success"},status_code=200)
     except Exception as e:
-        return JSONResponse({"message": str(e)}, status_code=500)
-
+        return JSONResponse({"message":str(e)},status_code=500)
 @router.get("/participants/{contest_id}")
 async def get_participants(contest_id: str):
     try:
@@ -168,4 +167,31 @@ async def get_active_contestants(request: Request, contest_id: str):
         active_contestants = ContestService.get_active_contestants(contest_id)
         return JSONResponse({"active_contestants": active_contestants}, status_code=200)
     except Exception as e:
+        return JSONResponse({"message":e},status_code=500)
+
+@router.get("/active")
+async def get_active_contests():
+    try:
+        contests = ContestService.get_active_contests()
+        return JSONResponse({"contests": contests}, status_code=200)
+    except Exception as e:
         return JSONResponse({"message": str(e)}, status_code=500)
+
+@router.get("/past")
+async def get_past_contests():
+    try:
+        contests = ContestService.get_past_contests()
+        return JSONResponse({"contests": contests}, status_code=200)
+    except Exception as e:
+        return JSONResponse({"message": str(e)}, status_code=500)
+
+@router.get("/is_registered/{contest_id}/{student_id}")
+async def is_user_registered(contest_id: str, student_id: str):
+    try:
+        participants = ContestService.get_number_of_participants(contest_id)
+        registered = student_id in participants
+        return JSONResponse({"registered": registered}, status_code=200)
+    except Exception as e:
+        return JSONResponse({"message": str(e)}, status_code=500)
+
+
