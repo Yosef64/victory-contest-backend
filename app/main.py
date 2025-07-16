@@ -23,7 +23,8 @@ app.add_middleware(
     allow_origins=[
         "https://7wwb0knl-5173.euw.devtunnels.ms",
         "https://victory-admin-page.vercel.app",
-        "http://localhost:5173" # Optional, depending on how it's opened
+        "http://localhost:5173",
+        "https://victory-contest.vercel.app"# Optional, depending on how it's opened
     ],
     allow_credentials=True,
     allow_methods=["*"],          
