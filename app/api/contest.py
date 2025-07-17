@@ -169,27 +169,21 @@ async def get_active_contestants(request: Request, contest_id: str):
     except Exception as e:
         return JSONResponse({"message":e},status_code=500)
 
-@router.get("/active")
-async def get_active_contests():
-    try:
-        contests = ContestService.get_active_contests()
-        return JSONResponse({"contests": contests}, status_code=200)
-    except Exception as e:
-        return JSONResponse({"message": str(e)}, status_code=500)
 
-@router.get("/past")
-async def get_past_contests():
-    try:
-        contests = ContestService.get_past_contests()
-        return JSONResponse({"contests": contests}, status_code=200)
-    except Exception as e:
-        return JSONResponse({"message": str(e)}, status_code=500)
 
 @router.get("/is_registered/{contest_id}/{student_id}")
 async def is_user_registered(contest_id: str, student_id: str):
     try:
         registered = ContestService.is_user_registered(contest_id, student_id)
         return JSONResponse({"registered": registered}, status_code=200)
+    except Exception as e:
+        return JSONResponse({"message": str(e)}, status_code=500)
+
+@router.get("/is_active/{contest_id}/{student_id}")
+async def is_user_active(contest_id: str, student_id: str):
+    try:
+        active = ContestService.activate_user(contest_id, student_id)
+        return JSONResponse({"active": active}, status_code=200)
     except Exception as e:
         return JSONResponse({"message": str(e)}, status_code=500)
 

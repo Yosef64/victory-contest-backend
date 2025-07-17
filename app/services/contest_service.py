@@ -57,3 +57,7 @@ class ContestService:
     def is_user_registered(contest_id: str, student_id: str):
         return ContestRepository.is_user_registered(contest_id, student_id)
     
+    @staticmethod
+    def activate_user(contest_id: str, student_id: str):
+        return ContestRepository.activate_user(contest_id, student_id)
+    
