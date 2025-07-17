@@ -126,3 +126,25 @@ class ContestRepository:
   "registered_at": datetime.now(timezone.utc).isoformat(),})
         
         return True
+
+    @staticmethod
+    def activate_user(contest_id: str, student_id: str):
+        registration = REGISTERED__REF.where("contest_id", "==", contest_id).where("student_id", "==", student_id).get()
+        
+        if not registration:
+            raise ValueError("User is not registered for this contest.")
+
+        reg_doc = registration[0]
+        reg_data = reg_doc.to_dict() if hasattr(reg_doc, 'to_dict') else None
+
+        if reg_data is None:
+            raise ValueError("Invalid registration document.")
+
+        if reg_data.get("is_active", False):
+            raise ValueError("User is already active.")
+
+        doc_ref = reg_doc.reference
+        doc_ref.update({"is_active": True})
+        
+        return True
+

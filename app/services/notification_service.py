@@ -3,45 +3,98 @@ from app.db.firebase import db
 from datetime import datetime
 from google.cloud import firestore
 
-NOTIFICATION_REF = db.collection("notifications")
+NOTIFICATIONS_REF = db.collection("notifications")
+STUDENT_NOTIFICATIONS_REF = db.collection("student_notifications")  # for flat structure
+
 
 class NotificationService:
     @staticmethod
-    def create_notification(user_id: str, message: str, notification_type: str):
+    def create_group_notification(message: str, notification_type: str, student_ids: list,title:str):
+        """
+        Create a shared notification and link it to many students.
+        """
+        # Step 1: Create shared notification
         notification = {
-            "userId": user_id,
+            "title":title,
             "message": message,
             "type": notification_type,
-            "read": False,
-            "createdAt": datetime.now()
+            "sent_at": datetime.utcnow(),
         }
-        NOTIFICATION_REF.add(notification)
-        return notification
+        notif_ref = NOTIFICATIONS_REF.document()
+        notif_ref.set(notification)
+
+        # Step 2: Link to all students
+        batch = db.batch()
+        for student_id in student_ids:
+            doc_ref = STUDENT_NOTIFICATIONS_REF.document()
+            batch.set(doc_ref, {
+                "notification_id": notif_ref.id,
+                "recipient_id": student_id,
+                "is_read": False
+            })
+        batch.commit()
+        return {"notification_id": notif_ref.id, "recipients": student_ids}
 
     @staticmethod
-    def get_user_notifications(user_id: str, limit: int = 10):
-        # Convert the stream to a list of dictionaries
-        notifications_stream = (
-            NOTIFICATION_REF.where("userId", "==", user_id)
-            .order_by("createdAt", direction=firestore.Query.DESCENDING)
-            .limit(limit)
+    def create_personal_notification(student_id: str, message: str, notification_type: str,title:str):
+        """
+        Create a notification for a single user.
+        """
+        notification = {
+            "title":title,
+            "message": message,
+            "type": notification_type,
+            "sent_at": datetime.utcnow()
+        }
+        notif_ref = NOTIFICATIONS_REF.document()
+        notif_ref.set(notification)
+
+        # Link it to that student
+        student_notif_ref = STUDENT_NOTIFICATIONS_REF.document()
+        student_notif_ref.set({
+            "notification_id": notif_ref.id,
+            "recipient_id": student_id,
+            "is_read": False
+        })
+        return {"notification_id": notif_ref.id, "recipient": student_id}
+
+    @staticmethod
+    def get_user_notifications(student_id: str, limit: int = 10):
+        """
+        Return a list of notifications for a student (joined from both collections).
+        """
+        notif_links = STUDENT_NOTIFICATIONS_REF \
+            .where("recipient_id", "==", student_id) \
+            .order_by("is_read") \
+            .limit(limit) \
             .stream()
-        )
-        notifications_list = []
-        for doc in notifications_stream:
-            notification_data = doc.to_dict()
-            notification_data["id"] = doc.id  # Include document ID
-            notifications_list.append(notification_data)
-        return notifications_list
+
+        notifications = []
+        for doc in notif_links:
+            data = doc.to_dict()
+            notif_id = data.get("notification_id")
+            notif_doc = NOTIFICATIONS_REF.document(notif_id).get()
+            if notif_doc.exists:
+                notif_data = notif_doc.to_dict()
+                if notif_data:
+                    notif_data["id"] = notif_doc.id
+                    notif_data["is_read"] = data.get("is_read", False)
+                notifications.append(notif_data)
+        return notifications
 
     @staticmethod
-    def mark_as_read(user_id: str):
-        unread_notifications = NOTIFICATION_REF.where("userId", "==", user_id).where("read", "==", False).stream()
+    def mark_as_read(student_id: str):
+        """
+        Mark all notifications for a student as read.
+        """
+        unread_refs = STUDENT_NOTIFICATIONS_REF \
+            .where("recipient_id", "==", student_id) \
+            .where("is_read", "==", False) \
+            .stream()
 
         batch = db.batch()
-        for notif in unread_notifications:
-            notif_ref = NOTIFICATION_REF.document(notif.id)
-            batch.update(notif_ref, {"read": True})
-
+        for doc in unread_refs:
+            ref = STUDENT_NOTIFICATIONS_REF.document(doc.id)
+            batch.update(ref, {"is_read": True})
         batch.commit()
         return True

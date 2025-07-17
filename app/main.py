@@ -8,6 +8,7 @@ from app.api.students import router as student_router
 from app.api.image import router as image_router
 from app.api.admin import router as admin_router
 from app.api.feedback import router as feedback_router # NEW: Import the feedback router
+from app.api.notification import router as notification_router
 
 import os
 from dotenv import load_dotenv
@@ -39,3 +40,4 @@ app.include_router(question_router, prefix="/api/question", tags=["Questions"])
 app.include_router(image_router, prefix="/api/image", tags=["Images"])
 app.include_router(admin_router,prefix="/api/admin", tags=["Admin"]) # Corrected missing closing quote and tag
 app.include_router(feedback_router, prefix="/api/feedback", tags=["Feedback"]) # NEW: Include the feedback router
+app.include_router(notification_router, prefix="/api", tags=["Notification"])
