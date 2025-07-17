@@ -112,7 +112,7 @@ def get_user_profile(request:Request,student_id:str):
     user = StudentService.get_user_profile(student_id)
     return JSONResponse({"user": user}, status_code=200)
 
-@router.get("/{student_id}/statistics")
+@router.get("/statistics/{student_id}")
 def get_student_statistics(student_id: str):
     try:
         stats = StudentRepository.get_user_statistics(student_id)
