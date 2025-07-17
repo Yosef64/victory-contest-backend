@@ -64,13 +64,13 @@ class BadgeRepository:
         """
         student_doc = STUDENT_REF.document(student_id).get()
         if not student_doc.exists:
-            return []
+            raise ValueError(f"Student with ID {student_id} does not exist.")
         student_data = student_doc.to_dict()
         if student_data is None:
-            return []
+            raise ValueError(f"No data found for student with ID {student_id}.")
         stud_achi = set(student_data.get("achievements", []))
-        if not achievements:
-            return []
+        if not stud_achi:
+            return achievements
         # Filter out only the earned badges
         badges = achievements.copy()
         for badge in stud_achi:
