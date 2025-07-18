@@ -41,3 +41,6 @@ class StudentService:
     @staticmethod
     def get_user_profile(student_id: str):
         return StudentRepository.get_user_profile(student_id)
+    @staticmethod
+    def get_student_editorial(student_id: str,contest_id:str):
+        return StudentRepository.get_student_editorial(student_id,contest_id)
