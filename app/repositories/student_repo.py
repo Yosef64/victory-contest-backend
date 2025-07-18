@@ -125,20 +125,25 @@ class StudentRepository:
     @staticmethod
     def get_student_rankings_by_contest(contest_id: str):
 
-        students = StudentRepository.get_students()
+        
         submissions = SubmissionRepository.get_structured_submissions_by_contest(contest_id)
         rankings = []
-        for student in students:
-            student_id = student.get("telegram_id")
-            stud_submission = submissions.get(student_id, [])
-            total_points = SubmissionRepository.calculate_points(stud_submission)
+        for sub in submissions:
+            student = sub.get("student")
+            if not student:
+                continue
+            
+            total_points = SubmissionRepository.calculate_points([sub])
             rankings.append({
-                "telegram_id": student_id,
-                "name": student.get("name"),
-                "total_points": total_points
+                "user_id": student.get("id",student.get("telegram_id"))  ,
+                "user_name": student.get("name"),
+                "score": sub.get("score",0),
+                "correct_answers":sub.get("score",0),
+                "total_questions": len(sub.get("missed_questions", [])) + sub.get("score", 0),
+                "time_taken": sub.get("time_spend", 0),
             })
         # Sort by total_points descending
-        rankings.sort(key=lambda x: x["total_points"], reverse=True)
+        rankings.sort(key=lambda x: (-x["score"], x["time_taken"]))
         # Add rank
         for idx, student in enumerate(rankings, start=1):
             student["rank"] = idx
