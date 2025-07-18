@@ -130,3 +130,14 @@ def get_student_submissions(student_id: str):
         return JSONResponse({"submissions": submissions}, status_code=200)
     except Exception as e:
         return JSONResponse({"message": str(e)}, status_code=500)
+@router.get("/editorial/{student_id}")
+async def get_student_editorial(request: Request, student_id: str):
+
+    constest_id = request.query_params.get("contest_id")
+    if not constest_id:
+        return JSONResponse({"message": "contest_id is required"}, status_code=400)
+    try:
+        editorial = StudentService.get_student_editorial(student_id,constest_id)
+        return JSONResponse({"editorial": editorial}, status_code=200)
+    except Exception as e:
+        return JSONResponse({"message": str(e)}, status_code=500)

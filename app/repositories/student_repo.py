@@ -1,5 +1,6 @@
+from fastapi import Query
 from starlette.background import P
-from app.db.firebase import db
+from app.db.firebase import CONTEST_REF, QUESTION_REF, db
 from app.schemas.student import StudentCreate, StudentUpdate
 from google.cloud.firestore import FieldFilter
 from app.repositories.submission_repo import SUBMISSION_REF, SubmissionRepository
@@ -177,3 +178,32 @@ class StudentRepository:
         result["payment"] = payment_to_result
         result["contestSubmissions"] = total_user_submissions
         return result
+    @staticmethod
+    def get_student_editorial(student_id: str, contest_id: str):
+        """Fetches the editorial for a student's submission in a specific contest."""
+        contest = CONTEST_REF.document(contest_id).get()
+        if not contest.exists:
+            raise ValueError("No contest found with the provided ID.")
+        contest = contest.to_dict()
+        if not contest:
+            raise ValueError("No contest data found.")
+        submissions = SUBMISSION_REF.where(
+            filter=FieldFilter("student.student_id", "==", student_id),
+            
+        ).where(filter=FieldFilter("contest.id", "==", contest_id)).stream()
+        submissions = [submission.to_dict() for submission in submissions]
+        sub = submissions[0].to_dict() if submissions else {}
+        questions ,missed_questions = contest.get("questions", []),sub.get("missed_questions", [])
+        for question in questions:
+            question_id = questions.get("id")
+            question["is_correct"] = None
+            question["user_answer"] = None
+            for missed_question in missed_questions:
+                if missed_question.get("id") == question_id:
+                    question["is_correct"] = False
+                    question["user_answer"] = missed_question.get("answer")
+                else:
+                    question["is_correct"] = True
+                    question["user_answer"] = question.get("answer")
+        
+        return questions
