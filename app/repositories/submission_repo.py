@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 from app.db.firebase import SUBMISSION_REF, STUDENT_REF,WRONG_ANSWER_REF
 from google.cloud.firestore import FieldFilter
 from uuid import uuid4
@@ -79,7 +80,7 @@ class SubmissionRepository:
             
         return submissions
     @staticmethod
-    def calculate_points(submissions):
+    def calculate_points(submissions:List[dict]) -> int:
         total_points = 0    
 
         for submission in submissions:
