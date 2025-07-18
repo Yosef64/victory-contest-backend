@@ -195,7 +195,7 @@ class StudentRepository:
         sub = submissions[0].to_dict() if submissions else {}
         questions ,missed_questions = contest.get("questions", []),sub.get("missed_questions", [])
         for question in questions:
-            question_id = questions.get("id")
+            question_id = question.get("id")
             question["is_correct"] = None
             question["user_answer"] = None
             for missed_question in missed_questions:
