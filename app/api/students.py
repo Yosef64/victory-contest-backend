@@ -109,8 +109,12 @@ async def get_grades_and_schools():
 
 @router.get("/profile/{student_id}", response_model=dict)
 def get_user_profile(request:Request,student_id:str):
-    user = StudentService.get_user_profile(student_id)
-    return JSONResponse({"user": user}, status_code=200)
+    try:
+
+        user = StudentService.get_user_profile(student_id)
+        return JSONResponse({"user": user}, status_code=200)
+    except Exception as e:
+        return JSONResponse({"message": str(e)}, status_code=500)
 
 @router.get("/statistics/{student_id}")
 def get_student_statistics(student_id: str):

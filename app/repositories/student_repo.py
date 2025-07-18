@@ -59,6 +59,13 @@ class StudentRepository:
         accuracy = int((correct_answers / total_questions) * 100) if total_questions else 0
         total_time = sum(sub.get("time_spend", 0) for sub in submissions)
         average_time = int(total_time / total_questions) if total_questions else 0
+        rankings = StudentRepository.get_student_rankings()
+        rank = -1
+        for inx, st in enumerate(rankings):
+            if st["telegram_id"] == student_id:
+                rank = inx + 1
+                break
+        
         # Streak calculation can be added if you have submission dates
         stats = {
             "totalContests": total_contests,
@@ -66,6 +73,7 @@ class StudentRepository:
             "correctAnswers": correct_answers,
             "accuracy": accuracy,
             "averageTime": average_time,
+            "rank": rank
             # "streak": streak, # Add streak logic if available
         }
         return stats
