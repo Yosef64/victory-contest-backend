@@ -86,7 +86,7 @@ class StudentRepository:
         rankings = []
         for student in students:
             student_id = student.get("telegram_id")
-            stud_submission = submissions[student_id]
+            stud_submission = submissions.get(student_id, [])
             total_points = SubmissionRepository.calculate_points(stud_submission)
             rankings.append({
                 "telegram_id": student_id,
