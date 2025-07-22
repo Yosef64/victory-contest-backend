@@ -78,6 +78,7 @@ class StatisticsRepository:
             "chapters": chapter_stats,
             "grades": grade_stats,
             "recommendations": recommendations,
-            "recent_activity": recent_activity
+            "recent_activity": recent_activity,
+            # 'leaderboard' is added in the service layer, not here
         }
         return stats
