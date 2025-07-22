@@ -1,4 +1,4 @@
-# app/api/notifications.py
+# app/api/notification.py
 from fastapi import APIRouter, Depends, HTTPException
 from app.services.notification_service import NotificationService
 from app.auth.auth import get_current_user
