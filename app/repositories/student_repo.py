@@ -53,7 +53,7 @@ class StudentRepository:
     @staticmethod
     def get_user_statistics(telegram_id):
         submissions = SUBMISSION_REF.where(
-        filter=FieldFilter("student.telegram_id", "==", telegram_id).stream()
+        filter=FieldFilter("student.telegram_id", "==", telegram_id)).stream()
         submissions = [submission.to_dict() for submission in submissions]
         total_contests = len(submissions)
         total_questions = sum(len(sub.get("missed_questions", [])) + sub.get("score",0) for sub in submissions)
