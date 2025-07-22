@@ -1,5 +1,6 @@
 from app.repositories.statistics_repo import StatisticsRepository
 from app.repositories.student_repo import StudentRepository # Import StudentRepository for ranking
+from app.repositories.leaderboard_repo import LeaderboardRepository  # <-- Add this import
 
 class StatisticsService:
     @staticmethod
@@ -20,4 +21,9 @@ class StatisticsService:
                 break
 
         user_stats["rank"] = rank
+
+        # Fetch leaderboard for the default 'week' time frame
+        leaderboard = LeaderboardRepository.get_leaderboard("week")
+        user_stats["leaderboard"] = leaderboard
+
         return user_stats

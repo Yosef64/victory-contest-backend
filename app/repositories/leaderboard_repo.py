@@ -37,9 +37,11 @@ class LeaderboardRepository:
         rank = 1
         for submission in submissions:
             student = submission.get("student", {})
+            user_id = student.get("Student_id") or student.get("student_id") or student.get("telegram_id") or "unknown"
+            user_name = student.get("name", "Unknown")
             leaderboard_data.append({
-                "user_id": student.get("Student_id"),
-                "user_name": student.get("name"),
+                "user_id": user_id,
+                "user_name": user_name,
                 "rank": rank,
                 "score": submission.get("score", 0),
                 "correct_answers": submission.get("correct_answers", 0),

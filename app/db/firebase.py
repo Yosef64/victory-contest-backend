@@ -1,19 +1,17 @@
 import os
 import base64
 import json
-import firebase_admin
+import firebase_admin 
 from firebase_admin import credentials, firestore
 
-base64_key = os.getenv("FIREBASE_CREDENTIALS")
+base64_key = os.getenv("FIREBASE_CREDENTIALS") 
 
-if not base64_key:
-    raise ValueError("FIREBASE_CREDENTIALS environment variable not set.")
-
-try:
+if base64_key:
     firebase_key_json = json.loads(base64.b64decode(base64_key).decode('utf-8'))
     cred = credentials.Certificate(firebase_key_json)
-except (json.JSONDecodeError, base64.binascii.Error) as e:
-    raise ValueError(f"Invalid FIREBASE_CREDENTIALS: {e}")
+    
+else:
+    cred = credentials.Certificate("app/db/key.json")
 
 firebase_admin.initialize_app(cred)
 
