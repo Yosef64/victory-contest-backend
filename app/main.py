@@ -17,7 +17,12 @@ app = FastAPI()
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or ["http://localhost:5173"] for more security
+    allow_origins=[
+        "https://7wwb0knl-5173.euw.devtunnels.ms",
+        "https://victory-admin-page.vercel.app",
+        "http://localhost:5173",
+        "https://victory-contest.vercel.app"
+    ],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
