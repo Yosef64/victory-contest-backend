@@ -9,6 +9,25 @@ STUDENT_REF = db.collection("students")
 
 class StudentRepository:
     @staticmethod
+    def _time_str_to_seconds(time_str):
+        """Converts a 'hh:mm:ss' string to total seconds."""
+        if not isinstance(time_str, str):
+            return 0
+        try:
+            # Split the string into hours, minutes, and seconds
+            parts = time_str.split(':')
+            if len(parts) != 3:
+                return 0 # Return 0 if format is incorrect
+            
+            # Calculate total seconds
+            hours = int(parts[0])
+            minutes = int(parts[1])
+            seconds = int(parts[2])
+            return hours * 3600 + minutes * 60 + seconds
+        except (ValueError, IndexError):
+            # If conversion to int fails or parts are missing, return 0
+            return 0
+    @staticmethod
     def add_student(student):
         """Adds a new student to Firestore."""
         student_id = student["telegram_id"]
@@ -59,7 +78,7 @@ class StudentRepository:
         total_questions = sum(len(sub.get("missed_questions", [])) + sub.get("score",0) for sub in submissions)
         correct_answers = sum(sub.get("score", 0) for sub in submissions)
         accuracy = int((correct_answers / total_questions) * 100) if total_questions else 0
-        total_time = sum(sub.get("time_spend", 0) for sub in submissions)
+        total_time = sum(StudentRepository._time_str_to_seconds(sub.get("time_spend")) for sub in submissions)
         average_time = int(total_time / total_questions) if total_questions else 0
         rankings = StudentRepository.get_student_rankings()
         rank = -1
