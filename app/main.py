@@ -8,28 +8,26 @@ from app.api.students import router as student_router
 from app.api.image import router as image_router
 from app.api.admin import router as admin_router
 from app.api.feedback import router as feedback_router # NEW: Import the feedback router
-
-import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
+from app.api.statistics import router as statistics_router # Import statistics router
+from app.api.leaderboard import router as leaderboard_router # Import leaderboard router    
 
 app = FastAPI()
 
-#cors origin
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","http://localhost:5174","http://127.0.0.1:5173","http://127.0.0.1:8000","https://victory-contest.vercel.app","https://victory-admin-page.vercel.app"],
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  
-    )
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-#initial routes
-app.include_router(student_router, prefix="/api/student", tags=["Students"])
-app.include_router(submission_router, prefix="/api/submission", tags=["Submissions"])
-app.include_router(contest_router, prefix="/api/contest", tags=["Contests"])
-app.include_router(question_router, prefix="/api/question", tags=["Questions"])
-app.include_router(image_router, prefix="/api/image", tags=["Images"])
-app.include_router(admin_router,prefix="/api/admin", tags=["Admin"]) # Corrected missing closing quote and tag
-app.include_router(feedback_router, prefix="/api/feedback", tags=["Feedback"]) # NEW: Include the feedback router
+app.include_router(contest_router, prefix="/api/contest", tags=["contest"])
+app.include_router(submission_router, prefix="/api/submission", tags=["submission"])
+app.include_router(question_router, prefix="/api/question", tags=["question"])
+app.include_router(student_router, prefix="/api/student", tags=["student"])
+app.include_router(image_router, prefix="/api/image", tags=["image"])
+app.include_router(admin_router, prefix="/api/admin", tags=["admin"])
+app.include_router(feedback_router, prefix="/api/feedback", tags=["feedback"])
+app.include_router(statistics_router, prefix="/api/statistics", tags=["statistics"]) # Include statistics router
+app.include_router(leaderboard_router, prefix="/api/leaderboard", tags=["leaderboard"])
