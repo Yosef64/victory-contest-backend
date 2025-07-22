@@ -22,7 +22,8 @@ app.add_middleware(
         "https://victory-admin-page.vercel.app",
         "http://localhost:5173",
         "http://localhost:5174",
-        "https://victory-contest.vercel.app"
+        "https://victory-contest.vercel.app",
+        "https://7wwb0knl-5173.euw.devtunnels.ms"
     ],  
     allow_credentials=True,
     allow_methods=["*"],
