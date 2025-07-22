@@ -51,8 +51,9 @@ class StudentRepository:
             return {}
         return student_doc.to_dict()
     @staticmethod
-    def get_user_statistics(student_id):
-        submissions = SUBMISSION_REF.where(filter=FieldFilter("student.student_id","==",student_id)).stream()
+    def get_user_statistics(telegram_id):
+        submissions = SUBMISSION_REF.where(
+        filter=FieldFilter("student.telegram_id", "==", telegram_id).stream()
         submissions = [submission.to_dict() for submission in submissions]
         total_contests = len(submissions)
         total_questions = sum(len(sub.get("missed_questions", [])) + sub.get("score",0) for sub in submissions)
@@ -63,7 +64,7 @@ class StudentRepository:
         rankings = StudentRepository.get_student_rankings()
         rank = -1
         for inx, st in enumerate(rankings):
-            if st["telegram_id"] == student_id:
+            if st["telegram_id"] == telegram_id:
                 rank = inx + 1
                 break
         
@@ -188,7 +189,7 @@ class StudentRepository:
         if not contest:
             raise ValueError("No contest data found.")
         submissions = SUBMISSION_REF.where(
-            filter=FieldFilter("student.student_id", "==", student_id),
+            filter=FieldFilter("student.telegram_id", "==", student_id),
             
         ).where(filter=FieldFilter("contest.id", "==", contest_id)).stream()
         submissions = [submission.to_dict() for submission in submissions]
