@@ -9,27 +9,18 @@ from app.api.image import router as image_router
 from app.api.admin import router as admin_router
 from app.api.feedback import router as feedback_router # NEW: Import the feedback router
 from app.api.notification import router as notification_router
-
-import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
+from app.api.statistics import router as statistics_router # Import statistics router
+from app.api.leaderboard import router as leaderboard_router # Import leaderboard router    
 
 app = FastAPI()
 
-#cors origin
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://7wwb0knl-5173.euw.devtunnels.ms",
-        "https://victory-admin-page.vercel.app",
-        "http://localhost:5173",
-        "https://victory-contest.vercel.app"# Optional, depending on how it's opened
-    ],
+    allow_origins=["*"],  # Or ["http://localhost:5173"] for more security
     allow_credentials=True,
-    allow_methods=["*"],          
-    allow_headers=["*"],          
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 #initial routes
@@ -40,4 +31,6 @@ app.include_router(question_router, prefix="/api/question", tags=["Questions"])
 app.include_router(image_router, prefix="/api/image", tags=["Images"])
 app.include_router(admin_router,prefix="/api/admin", tags=["Admin"]) # Corrected missing closing quote and tag
 app.include_router(feedback_router, prefix="/api/feedback", tags=["Feedback"]) # NEW: Include the feedback router
-app.include_router(notification_router, prefix="/api", tags=["Notification"])
+app.include_router(notification_router, prefix="/api/notification", tags=["Notification"]) # Include notification router
+app.include_router(statistics_router, prefix="/api/statistics", tags=["Statistics"]) # Include statistics router
+app.include_router(leaderboard_router, prefix="/api/leaderboard", tags=["Leaderboard"]) # Include leaderboard router
