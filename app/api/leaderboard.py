@@ -5,6 +5,7 @@ from app.services.leaderboard_service import LeaderboardService
 
 router = APIRouter()
 
+@router.get("", response_model=dict)
 @router.get("/", response_model=dict)
 async def get_leaderboard(timeFrame: Optional[str] = Query(None, enum=["today", "week", "month", "all"])):
     """

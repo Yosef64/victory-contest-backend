@@ -17,10 +17,11 @@ app = FastAPI()
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","http://localhost:5174","http://127.0.0.1:5173","http://127.0.0.1:8000","https://victory-contest.vercel.app","https://victory-admin-page.vercel.app"],
+    allow_origins=["*"],  # Or ["http://localhost:5173"] for more security
     allow_credentials=True,
-    allow_methods=["*"],  
-    )
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 #initial routes
 app.include_router(student_router, prefix="/api/student", tags=["Students"])
@@ -30,3 +31,6 @@ app.include_router(question_router, prefix="/api/question", tags=["Questions"])
 app.include_router(image_router, prefix="/api/image", tags=["Images"])
 app.include_router(admin_router,prefix="/api/admin", tags=["Admin"]) # Corrected missing closing quote and tag
 app.include_router(feedback_router, prefix="/api/feedback", tags=["Feedback"]) # NEW: Include the feedback router
+app.include_router(notification_router, prefix="/api/notification", tags=["Notification"]) # Include notification router
+app.include_router(statistics_router, prefix="/api/statistics", tags=["Statistics"]) # Include statistics router
+app.include_router(leaderboard_router, prefix="/api/leaderboard", tags=["Leaderboard"]) # Include leaderboard router
