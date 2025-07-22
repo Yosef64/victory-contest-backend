@@ -28,7 +28,7 @@ class SubmissionService:
 
     @staticmethod
     def get_grades_and_schools():
-        return SubmissionRepository.get_grades_and_schools()
+        return SubmissionRepository.get_all_submissions()
     
     @staticmethod
     def create_submission(submission):
