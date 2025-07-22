@@ -18,7 +18,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://txnfqqn7-5173.euw.devtunnels.ms/",
+        "https://txnfqqn7-5173.euw.devtunnels.ms",
         "https://victory-admin-page.vercel.app",
         "http://localhost:5173",
         "http://localhost:5174",
