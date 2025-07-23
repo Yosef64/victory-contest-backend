@@ -74,8 +74,11 @@ async def get_student_rankings():
 
 @router.get("/rank/{contest_id}", response_model=dict)
 async def get_student_rankings_by_contest(contest_id: str):
-    rankings = StudentService.get_student_rankings_by_contest(contest_id)
-    return JSONResponse({"rankings": rankings}, status_code=200)
+    try:
+        rankings = StudentService.get_student_rankings_by_contest(contest_id)
+        return JSONResponse({"rankings": rankings}, status_code=200)
+    except Exception as e:
+        return JSONResponse({"message": str(e)}, status_code=500)
 
 @router.get("/{student_id}", response_model=dict)
 async def get_student_by_id(request:Request,student_id:str):
