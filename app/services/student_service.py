@@ -35,5 +35,9 @@ class StudentService:
         return StudentRepository.get_student_rankings()
 
     @staticmethod
+    def get_student_rankings_by_contest(contest_id: str):
+        return StudentRepository.get_student_rankings_by_contest(contest_id)
+
+    @staticmethod
     def get_user_profile(student_id: str):
         return StudentRepository.get_user_profile(student_id)

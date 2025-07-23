@@ -79,6 +79,27 @@ class StudentRepository:
             student["rank"] = idx
         return rankings
     @staticmethod
+    def get_student_rankings_by_contest(contest_id: str):
+
+        students = StudentRepository.get_students()
+        submissions = SubmissionRepository.get_structured_submissions_by_contest(contest_id)
+        rankings = []
+        for student in students:
+            student_id = student.get("telegram_id")
+            stud_submission = submissions.get(student_id, [])
+            total_points = SubmissionRepository.calculate_points(stud_submission)
+            rankings.append({
+                "telegram_id": student_id,
+                "name": student.get("name"),
+                "total_points": total_points
+            })
+        # Sort by total_points descending
+        rankings.sort(key=lambda x: x["total_points"], reverse=True)
+        # Add rank
+        for idx, student in enumerate(rankings, start=1):
+            student["rank"] = idx
+        return rankings
+    @staticmethod
     def get_grades_and_schools():
         grades = {"schools": set(), "grades": set()}
         for doc in STUDENT_REF.stream():

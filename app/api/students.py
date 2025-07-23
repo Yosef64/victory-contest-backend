@@ -50,7 +50,11 @@ async def get_quick_stat(request:Request,student_id:str):
 async def get_student_rankings():
     rankings = StudentService.get_student_rankings()
     return JSONResponse({"rankings": rankings}, status_code=200)
-    
+
+@router.get("/rank/{contest_id}", response_model=dict)
+async def get_student_rankings_by_contest(contest_id: str):
+    rankings = StudentService.get_student_rankings_by_contest(contest_id)
+    return JSONResponse({"rankings": rankings}, status_code=200)
 
 @router.get("/{student_id}", response_model=dict)
 async def get_student_by_id(request:Request,student_id:str):
