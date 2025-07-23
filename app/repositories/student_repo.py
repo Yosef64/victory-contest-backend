@@ -221,7 +221,8 @@ class StudentRepository:
             question["user_answer"] = question.get("answer")
             
             for missed_question in missed_questions:
-                if missed_question.get("id") == question_id:
+                q = missed_question.get("question")
+                if q.get("id") == question_id:
                     question["is_correct"] = False
                     question["user_answer"] = missed_question.get("answer")
                     break
