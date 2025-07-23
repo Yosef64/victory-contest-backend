@@ -185,6 +185,7 @@ async def is_user_active(contest_id: str, student_id: str):
         active = ContestService.activate_user(contest_id, student_id)
         return JSONResponse({"active": active}, status_code=200)
     except Exception as e:
+        print(f"Error checking user active status: {e}")
         return JSONResponse({"message": str(e)}, status_code=500)
 
 

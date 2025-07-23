@@ -54,7 +54,7 @@ class SubmissionRepository:
         ref.update({})
     @staticmethod
     def get_user_submission(user_id):
-        query = SUBMISSION_REF.where("student.student_id", "==", user_id)
+        query = SUBMISSION_REF.where("student.telegram_id", "==", user_id)
         docs = query.stream()
         submissions = [doc.to_dict() for doc in docs]
         return submissions
@@ -63,7 +63,9 @@ class SubmissionRepository:
         submissions = defaultdict(list)
         for doc in SUBMISSION_REF.stream():
             submission = doc.to_dict()
-            st_id = submission["student"]["student_id"]
+            student_data = submission.get("student", {})
+            st_id = student_data.get("telegram_id")
+
             if st_id:
                 submissions[st_id].append(submission)
             
@@ -74,7 +76,8 @@ class SubmissionRepository:
         query = SUBMISSION_REF.where("contest.id", "==", contest_id)
         for doc in query.stream():
             submission = doc.to_dict()
-            st_id = submission["student"]["student_id"]
+            student_data = submission.get("student", {})
+            st_id = student_data.get("telegram_id")
             if st_id:
                 submissions[st_id].append(submission)
             
