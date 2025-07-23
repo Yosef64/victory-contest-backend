@@ -224,7 +224,7 @@ class StudentRepository:
                 q = missed_question.get("question")
                 if q.get("id") == question_id:
                     question["is_correct"] = False
-                    question["user_answer"] = missed_question.get("answer")
+                    question["user_answer"] = missed_question.get("selected_answer")
                     break
                 
         return questions
