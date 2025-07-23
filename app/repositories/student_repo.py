@@ -218,13 +218,13 @@ class StudentRepository:
         for question in questions:
             question_id = question.get("id")
             question["is_correct"] = True
-            question["user_answer"] = question.get("answer")
+            question["user_answer"] = int(question.get("answer"))
             
             for missed_question in missed_questions:
                 q = missed_question.get("question")
                 if q.get("id") == question_id:
                     question["is_correct"] = False
-                    question["user_answer"] = missed_question.get("selected_answer")
+                    question["user_answer"] = int(missed_question.get("selected_answer")) + 1 if missed_question.get("selected_answer") else None
                     break
                 
         return questions
