@@ -122,6 +122,7 @@ def get_student_statistics(student_id: str):
         stats = StudentRepository.get_user_statistics(student_id)
         return JSONResponse({"message":stats},status_code=200)
     except Exception as e:
+        print(e)
         return JSONResponse({"message": str(e)}, status_code=500)
 @router.get("/student/{student_id}/badge")
 def get_student_submissions(student_id: str):
