@@ -17,7 +17,6 @@ async def add_student(request:Request):
         return JSONResponse({"message":"success"},status_code=200)
     except Exception as e:
         return JSONResponse({"message":e},status_code=200)
-    # Update your student registration endpoint
 @router.post("/register")
 async def register_student(student: StudentCreate, request: Request):
     try:
