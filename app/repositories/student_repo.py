@@ -14,18 +14,15 @@ class StudentRepository:
         if not isinstance(time_str, str):
             return 0
         try:
-            # Split the string into hours, minutes, and seconds
             parts = time_str.split(':')
             if len(parts) != 3:
-                return 0 # Return 0 if format is incorrect
+                return 0
             
-            # Calculate total seconds
             hours = int(parts[0])
             minutes = int(parts[1])
             seconds = int(parts[2])
             return hours * 3600 + minutes * 60 + seconds
         except (ValueError, IndexError):
-            # If conversion to int fails or parts are missing, return 0
             return 0
     @staticmethod
     def add_student(student):
@@ -145,29 +142,32 @@ class StudentRepository:
  
     @staticmethod
     def get_student_rankings_by_contest(contest_id: str):
-
         
         submissions = SubmissionRepository.get_structured_submissions_by_contest(contest_id)
         rankings = []
-        for sub in submissions:
+        for student_submissions in submissions.values():
+            if not student_submissions:
+                continue
+            sub = student_submissions[0]
+            
             student = sub.get("student")
             if not student:
                 continue
-            
-            total_points = SubmissionRepository.calculate_points([sub])
+
             rankings.append({
-                "user_id": student.get("id",student.get("telegram_id"))  ,
+                "user_id": student.get("id", student.get("telegram_id")),
                 "user_name": student.get("name"),
-                "score": sub.get("score",0),
-                "correct_answers":sub.get("score",0),
+                "score": sub.get("score", 0),
+                "correct_answers": sub.get("score", 0),
                 "total_questions": len(sub.get("missed_questions", [])) + sub.get("score", 0),
                 "time_taken": sub.get("time_spend", 0),
             })
-        # Sort by total_points descending
+            
         rankings.sort(key=lambda x: (-x["score"], x["time_taken"]))
-        # Add rank
-        for idx, student in enumerate(rankings, start=1):
-            student["rank"] = idx
+        
+        for idx, student_rank_data in enumerate(rankings, start=1):
+            student_rank_data["rank"] = idx
+            
         return rankings
     @staticmethod
     def get_grades_and_schools():
