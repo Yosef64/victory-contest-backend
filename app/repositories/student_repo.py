@@ -207,23 +207,23 @@ class StudentRepository:
         contest = contest.to_dict()
         if not contest:
             raise ValueError("No contest data found.")
-        submissions = SUBMISSION_REF.where(
-            filter=FieldFilter("student.telegram_id", "==", student_id),
             
+        submissions_stream = SUBMISSION_REF.where(
+            filter=FieldFilter("student.telegram_id", "==", student_id)
         ).where(filter=FieldFilter("contest.id", "==", contest_id)).stream()
-        submissions = [submission.to_dict() for submission in submissions]
-        sub = submissions[0].to_dict() if submissions else {}
-        questions ,missed_questions = contest.get("questions", []),sub.get("missed_questions", [])
+        
+        submissions = [submission.to_dict() for submission in submissions_stream]  
+        sub = submissions[0] if submissions else {}      
+        questions, missed_questions = contest.get("questions", []), sub.get("missed_questions", [])
         for question in questions:
             question_id = question.get("id")
-            question["is_correct"] = None
-            question["user_answer"] = None
+            question["is_correct"] = True
+            question["user_answer"] = question.get("answer")
+            
             for missed_question in missed_questions:
                 if missed_question.get("id") == question_id:
                     question["is_correct"] = False
                     question["user_answer"] = missed_question.get("answer")
-                else:
-                    question["is_correct"] = True
-                    question["user_answer"] = question.get("answer")
-        
+                    break
+                
         return questions
