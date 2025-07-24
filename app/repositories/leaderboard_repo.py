@@ -33,21 +33,29 @@ class LeaderboardRepository:
 
         submissions = [doc.to_dict() for doc in submissions_query.stream()]
 
-        leaderboard_data = []
-        rank = 1
-        for submission in submissions:
-            student = submission.get("student", {})
+        # Deduplicate: keep only the best (highest score) submission per user
+        user_best = {}
+        for sub in submissions:
+            student = sub.get("student", {})
             user_id = student.get("Student_id") or student.get("student_id") or student.get("telegram_id") or "unknown"
-            user_name = student.get("name", "Unknown")
+            # If this user is not in user_best, or this submission has a higher score, update
+            if user_id not in user_best or sub.get("score", 0) > user_best[user_id].get("score", 0):
+                user_best[user_id] = sub
+
+        # Sort users by best score descending
+        sorted_users = sorted(user_best.values(), key=lambda x: x.get("score", 0), reverse=True)
+
+        leaderboard_data = []
+        for rank, sub in enumerate(sorted_users, 1):
+            student = sub.get("student", {})
+            user_id = student.get("Student_id") or student.get("student_id") or student.get("telegram_id") or "unknown"
             leaderboard_data.append({
                 "user_id": user_id,
-                "user_name": user_name,
+                "user_name": student.get("name", "Unknown"),
                 "rank": rank,
-                "score": submission.get("score", 0),
-                "correct_answers": submission.get("correct_answers", 0),
-                "total_questions": submission.get("total_questions", 0),
-                "time_taken": submission.get("time_spend", 0)
+                "score": sub.get("score", 0),
+                "correct_answers": sub.get("correct_answers", 0),
+                "total_questions": sub.get("total_questions", 0),
+                "time_taken": sub.get("time_spend", 0)
             })
-            rank += 1
-
         return leaderboard_data
