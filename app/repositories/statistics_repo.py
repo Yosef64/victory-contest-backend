@@ -12,10 +12,10 @@ class StatisticsRepository:
         submissions = [submission.to_dict() for submission in submissions]
 
         total_contests = len(submissions)
-        total_questions = sum(sub.get("total_questions", 0) for sub in submissions)
-        correct_answers = sum(sub.get("score", 0) for sub in submissions)
+        total_questions = sum(int(sub.get("total_questions", 0) or 0) for sub in submissions)
+        correct_answers = sum(int(sub.get("score", 0) or 0) for sub in submissions)
         accuracy = int((correct_answers / total_questions) * 100) if total_questions else 0
-        total_time = sum(sub.get("time_spend", 0) for sub in submissions)
+        total_time = sum(int(sub.get("time_spend", 0) or 0) for sub in submissions)
         average_time = int(total_time / total_questions) if total_questions else 0
 
         # Calculate subject, chapter, and grade statistics
