@@ -5,14 +5,17 @@ from app.services.leaderboard_service import LeaderboardService
 
 router = APIRouter()
 
-@router.get("", response_model=dict)
-@router.get("/", response_model=dict)
-async def get_leaderboard(timeFrame: Optional[str] = Query(None, enum=["today", "week", "month", "all"])):
-    """
-    Fetches the leaderboard data based on the specified time frame.
-    """
+@router.get("")
+async def get_leaderboard(timeFrame: Optional[str] = Query("week", enum=["today", "week", "month", "all"])):
     try:
         leaderboard = await LeaderboardService.get_leaderboard(timeFrame)
-        return JSONResponse({"leaderboard": leaderboard}, status_code=200)
+        return JSONResponse({
+            "leaderboard": leaderboard,
+            "timeFrame": timeFrame,
+            "status": "success"
+        }, status_code=200)
     except Exception as e:
-        return JSONResponse({"message": str(e)}, status_code=500)
+        return JSONResponse({
+            "message": str(e),
+            "status": "error"
+        }, status_code=500)
