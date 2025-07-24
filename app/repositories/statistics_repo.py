@@ -5,6 +5,20 @@ from collections import defaultdict
 
 STATISTICS_REF = db.collection("statistics")
 
+def parse_time_spend(value):
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        if value.isdigit():
+            return int(value)
+        # Try to parse hh:mm:ss
+        try:
+            h, m, s = value.split(':')
+            return int(h) * 3600 + int(m) * 60 + int(s)
+        except Exception:
+            return 0
+    return 0
+
 class StatisticsRepository:
     @staticmethod
     def get_user_statistics(student_id):
@@ -15,7 +29,7 @@ class StatisticsRepository:
         total_questions = sum(int(sub.get("total_questions", 0) or 0) for sub in submissions)
         correct_answers = sum(int(sub.get("score", 0) or 0) for sub in submissions)
         accuracy = int((correct_answers / total_questions) * 100) if total_questions else 0
-        total_time = sum(int(sub.get("time_spend", 0) or 0) for sub in submissions)
+        total_time = sum(parse_time_spend(sub.get("time_spend", 0)) for sub in submissions)
         average_time = int(total_time / total_questions) if total_questions else 0
 
         # Calculate subject, chapter, and grade statistics
