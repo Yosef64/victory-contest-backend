@@ -5,14 +5,16 @@ from typing import Dict, Any
 
 router = APIRouter()
 
-@router.get("/{student_id}", response_model=Dict[str, Any])
+@router.get("/{student_id}")
 async def get_statistics_for_student(student_id: str):
     try:
         stats = await StatisticsService.get_user_statistics(student_id)
-        return stats
+        return JSONResponse({
+            "status": "success",
+            "data": stats
+        }, status_code=200)
     except Exception as e:
-        # Return the error message in the response for debugging
-        return JSONResponse(
-            status_code=500,
-            content={"detail": str(e)}
-        )
+        return JSONResponse({
+            "status": "error",
+            "message": str(e)
+        }, status_code=500)
