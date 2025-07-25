@@ -44,7 +44,7 @@ class SubmissionRepository:
         submission_data['total_questions'] = total_count
 
         doc_ref = SUBMISSION_REF.document()  
-        submission_data["submission_time"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        submission_data["submission_time"] = datetime.utcnow()
         submission_data["submission_id"] = doc_ref.id 
         doc_ref.set(submission_data)
         

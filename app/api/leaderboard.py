@@ -15,6 +15,7 @@ async def get_leaderboard(timeFrame: Optional[str] = Query("week", enum=["today"
             "status": "success"
         }, status_code=200)
     except Exception as e:
+        print(e)
         return JSONResponse({
             "message": str(e),
             "status": "error"
