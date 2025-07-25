@@ -1,55 +1,83 @@
-from fastapi import Query
-from google.cloud import firestore  # Added import for firestore
-from app.db.firebase import CONTEST_REF, QUESTION_REF, db, SUBMISSION_REF
-from google.cloud.firestore import FieldFilter
+from zoneinfo import ZoneInfo
+from app.db.firebase import SUBMISSION_REF
 from datetime import datetime, timedelta
-import pytz
 
 class LeaderboardRepository:
+    def format_seconds_to_hms(seconds: int) -> str:
+        """Converts a total number of seconds into an HH:MM:SS string."""
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        if hours > 0:
+            return f"{int(hours)}:{int(minutes):02}:{int(secs):02}"
+        else:
+            return f"{int(minutes):02}:{int(secs):02}"
     @staticmethod
     def get_leaderboard(timeFrame: str = "week"):
-        """Fetches the leaderboard data from Firestore based on the specified time frame."""
-        now = datetime.utcnow()
+        """
+        Fetches the top 100 leaderboard entries by aggregating all submissions
+        from each user within the specified time frame.
+        """
+        TARGET_TZ = ZoneInfo("Africa/Addis_Ababa")
+        now_local = datetime.now(TARGET_TZ)
+        
         start_time = None
 
         if timeFrame == "today":
-            start_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            start_time = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
         elif timeFrame == "week":
-            start_time = now - timedelta(days=now.weekday())
+            start_time = now_local - timedelta(days=now_local.weekday())
             start_time = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
         elif timeFrame == "month":
-            start_time = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            start_time = now_local.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-        query = SUBMISSION_REF.order_by("score", direction=firestore.Query.DESCENDING)
-        
+        query = SUBMISSION_REF
         if start_time:
             query = query.where("submission_time", ">=", start_time)
 
-        submissions = []
+        user_aggregates = {}
+
         for doc in query.stream():
             sub = doc.to_dict()
             student = sub.get("student", {})
-            
-            # Convert time_spend to seconds if it's in hh:mm:ss format
-            time_spend = sub.get("time_spend", 0)
-            if isinstance(time_spend, str):
+            user_id = student.get("telegram_id")
+
+            if not user_id:
+                continue 
+
+            time_taken_seconds = 0
+            time_taken_raw = sub.get("time_spend", 0)
+            if isinstance(time_taken_raw, str):
                 try:
-                    h, m, s = map(int, time_spend.split(':'))
-                    time_spend = h * 3600 + m * 60 + s
-                except:
-                    time_spend = 0
+                    h, m, s = map(int, time_taken_raw.split(':'))
+                    time_taken_seconds = h * 3600 + m * 60 + s
+                except ValueError:
+                    time_taken_seconds = 0
 
-            submissions.append({
-                "user_id": student.get("telegram_id", "unknown"),
-                "user_name": student.get("name", "Unknown"),
-                "score": sub.get("score", 0),
-                "correct_answers": sub.get("correct_answers", 0),
-                "total_questions": sub.get("total_questions", 0),
-                "time_taken": time_spend
-            })
+            elif isinstance(time_taken_raw, int):
+                time_taken_seconds = time_taken_raw
 
-        # Add ranks
-        for rank, entry in enumerate(submissions, 1):
+            if user_id not in user_aggregates:
+                user_aggregates[user_id] = {
+                    "user_id": user_id,
+                    "user_name": student.get("name", "Unknown"),
+                    "score": sub.get("score", 0),
+                    "correct_answers": sub.get("score", 0),
+                    "total_questions": sub.get("score", 0) + len(sub.get("missed_questions", [])),
+                    "time_taken": time_taken_seconds,
+                    "imgurl": student.get("imgurl", ""),
+                }
+            else:
+                user_aggregates[user_id]["score"] += sub.get("score", 0)
+                user_aggregates[user_id]["correct_answers"] += sub.get("score", 0)
+                user_aggregates[user_id]["total_questions"] += sub.get("score", 0) + len(sub.get("missed_questions", []))
+                user_aggregates[user_id]["time_taken"] += time_taken_seconds
+
+        leaderboard_list = list(user_aggregates.values())
+        sorted_leaderboard = sorted(leaderboard_list, key=lambda u: (-u['score'], u['time_taken']))
+        final_leaderboard = []
+        for rank, entry in enumerate(sorted_leaderboard[:100], 1):
             entry["rank"] = rank
-
-        return submissions[:100]  # Limit to top 100
+            entry["time_taken"] = LeaderboardRepository.format_seconds_to_hms(entry["time_taken"])
+            final_leaderboard.append(entry)
+        return final_leaderboard

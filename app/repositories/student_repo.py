@@ -193,10 +193,29 @@ class StudentRepository:
         payment_date = payment.get("payment_date","")
         pay_stat_next = PaymentRepository.calculate_next_payment_status(payment) or {}
         payment_to_result = {"lastPayment":payment_date,**pay_stat_next}
+        contest_submissions = []
+        for inx, sub in enumerate(total_user_submissions):
+            contest = sub.get("contest", {})
+            if contest:
+                contest_submissions.append({
+                    "id": sub.get("id",inx+1),
+                    "contest": {
+                        "id": contest.get("id"),
+                        "title": contest.get("title"),
+                        "subject": contest.get("subject"),
+                        "grade": contest.get("grade")
+                    },
+                    "totalQuestions": len(sub.get("missed_questions", [])) + sub.get("score", 0),
+                    "correctAnswers": sub.get("score", 0),
+                    "missedQuestions": len(sub.get("missed_questions", [])),
+                    "score": sub.get("score", 0),
+                    "submittedAt": sub.get("submitted_at", None)
+                })
+
         result = {**student}
         result["totalPoints"] = total_points
         result["payment"] = payment_to_result
-        result["contestSubmissions"] = total_user_submissions
+        result["contestSubmissions"] = contest_submissions
         return result
     @staticmethod
     def get_student_editorial(student_id: str, contest_id: str):
