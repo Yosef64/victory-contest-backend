@@ -1,6 +1,8 @@
 from zoneinfo import ZoneInfo
-from app.db.firebase import SUBMISSION_REF
-from datetime import datetime, timedelta
+from google.cloud import firestore  # Added import for firestore
+from app.db.firebase import CONTEST_REF, QUESTION_REF, db, SUBMISSION_REF
+from datetime import datetime, timedelta,timezone
+import pytz
 
 class LeaderboardRepository:
     def format_seconds_to_hms(seconds: int) -> str:
@@ -20,20 +22,23 @@ class LeaderboardRepository:
         """
         TARGET_TZ = ZoneInfo("Africa/Addis_Ababa")
         now_local = datetime.now(TARGET_TZ)
-        
-        start_time = None
+        start_time_local = None
 
         if timeFrame == "today":
-            start_time = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+            start_time_local = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
         elif timeFrame == "week":
-            start_time = now_local - timedelta(days=now_local.weekday())
-            start_time = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            start_time_local = now_local - timedelta(days=now_local.weekday())
+            start_time_local = start_time_local.replace(hour=0, minute=0, second=0, microsecond=0)
         elif timeFrame == "month":
-            start_time = now_local.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            start_time_local = now_local.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
         query = SUBMISSION_REF
-        if start_time:
-            query = query.where("submission_time", ">=", start_time)
+
+        if start_time_local:
+            start_time_utc = start_time_local.astimezone(timezone.utc)
+            start_time_iso_string = start_time_utc.isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+
+            query = query.where("submission_time", ">=", start_time_iso_string)
 
         user_aggregates = {}
 
@@ -80,4 +85,5 @@ class LeaderboardRepository:
             entry["rank"] = rank
             entry["time_taken"] = LeaderboardRepository.format_seconds_to_hms(entry["time_taken"])
             final_leaderboard.append(entry)
+        print(f"Final leaderboard: {final_leaderboard}")
         return final_leaderboard
