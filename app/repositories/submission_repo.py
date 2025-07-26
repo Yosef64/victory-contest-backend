@@ -90,7 +90,7 @@ class SubmissionRepository:
         ref.update({})
     @staticmethod
     def get_user_submission(user_id):
-        query = SUBMISSION_REF.where("student.telegram_id", "==", user_id)
+        query = SUBMISSION_REF.where(filter=FieldFilter("student.telegram_id", "==", user_id))
         docs = query.stream()
         submissions = [doc.to_dict() for doc in docs]
         return submissions

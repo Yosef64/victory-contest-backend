@@ -27,7 +27,7 @@ class ContestRepository:
         ref = CONTEST_REF.document(contest_id).get()
         if not ref.exists:
             raise ValueError("Contest not found.")
-        final_result = ref.to_dict() 
+        final_result = {**ref.to_dict()}
         if not final_result:
             return {}
         all_questions = QuestionRepository.get_structured_questions()

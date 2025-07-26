@@ -23,29 +23,20 @@ def parse_time_spend(value):
     return 0
 
 class StatisticsRepository:
-    @staticmethod
     def get_user_stats(student_id: str) -> dict:
         user_submissions = SubmissionRepository.get_user_submission(student_id)
         all_questions = QuestionRepository.get_structured_questions()
         all_contests = ContestRepository.get_structured_contests()
 
-
         if not user_submissions:
             return {
-                "total_contests": 0,
-                "total_questions": 0,
-                "correct_answers": 0,
-                "accuracy": 0.0,
-                "average_time": 0.0,
-                "subjects": {},
-                "chapters": {},
-                "grades": {},
-                "performance_trend": [],
+                "total_contests": 0, "total_questions": 0, "correct_answers": 0,
+                "accuracy": 0.0, "average_time": 0.0, "subjects": {},
+                "chapters": {}, "grades": {}, "performance_trend": [],
             }
 
         contests_participated = set()
         total_time_seconds = 0
-
         subjects = defaultdict(lambda: {"total": 0, "correct": 0})
         chapters = defaultdict(lambda: {"total": 0, "correct": 0})
         grades = defaultdict(lambda: {"total": 0, "correct": 0})
@@ -62,16 +53,23 @@ class StatisticsRepository:
                 h, m, s = map(int, sub['time_spend'].split(':'))
                 total_time_seconds += h * 3600 + m * 60 + s
             except (ValueError, AttributeError):
-                pass  
+                pass
 
             missed_question_ids = set(sub['missed_questions'])
-            submission_month = sub['submission_time'].strftime('%Y-%m')
+
+            try:
+                submission_dt_object = datetime.fromisoformat(sub['submission_time'].replace('Z', '+00:00'))
+                submission_month = submission_dt_object.strftime('%Y-%m')
+            except (TypeError, ValueError):
+                submission_month = "unknown-month"
+
             for question_id in contest['questions']:
-                question = all_questions[question_id] if question_id in all_questions else None
+                question = all_questions.get(question_id)
                 if not question:
                     continue
 
                 is_correct = question_id not in missed_question_ids
+
                 subjects[question['subject']]['total'] += 1
                 chapters[question['chapter']]['total'] += 1
                 grades[question['grade']]['total'] += 1
@@ -82,6 +80,7 @@ class StatisticsRepository:
                     grades[question['grade']]['correct'] += 1
                     performance_trend[submission_month]['correct'] += 1
 
+        # ... (Final calculation and return logic is the same)
         total_contests_val = len(contests_participated)
         total_questions_val = sum(cat['total'] for cat in subjects.values())
         correct_answers_val = sum(cat['correct'] for cat in subjects.values())
@@ -102,13 +101,9 @@ class StatisticsRepository:
             })
 
         return {
-            "total_contests": total_contests_val,
-            "total_questions": total_questions_val,
-            "correct_answers": correct_answers_val,
-            "accuracy": round(accuracy_val, 2),
-            "average_time": round(average_time_val, 2), 
-            "subjects": dict(subjects),
-            "chapters": dict(chapters),
-            "grades": dict(grades),
+            "total_contests": total_contests_val, "total_questions": total_questions_val,
+            "correct_answers": correct_answers_val, "accuracy": round(accuracy_val, 2),
+            "average_time": round(average_time_val, 2), "subjects": dict(subjects),
+            "chapters": dict(chapters), "grades": dict(grades),
             "performance_trend": trend_list
         }
