@@ -51,7 +51,7 @@ async def login_admin(request:Request):
                 value=access_token,
                 httponly=True,
                 secure=True,  # ✅ false in dev, true in prod
-                samesite=None,
+                samesite="lax",
                 max_age=60 * 60,
                 path="/"
             )
