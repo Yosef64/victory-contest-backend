@@ -143,4 +143,5 @@ async def get_student_editorial(request: Request, student_id: str):
         editorial = StudentService.get_student_editorial(student_id,constest_id)
         return JSONResponse({"editorial": editorial}, status_code=200)
     except Exception as e:
+        print(e)
         return JSONResponse({"message": str(e)}, status_code=500)

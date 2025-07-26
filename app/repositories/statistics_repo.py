@@ -3,7 +3,9 @@ from app.db.firebase import db
 from google.cloud.firestore import FieldFilter
 from app.repositories.submission_repo import SUBMISSION_REF
 from collections import defaultdict
-
+from app.repositories.submission_repo import SubmissionRepository
+from app.repositories.question_repo import QuestionRepository
+from app.repositories.contest_repo import ContestRepository
 STATISTICS_REF = db.collection("statistics")
 
 def parse_time_spend(value):
@@ -22,116 +24,91 @@ def parse_time_spend(value):
 
 class StatisticsRepository:
     @staticmethod
-    def get_user_statistics(student_id):
-        # Get all submissions for the student
-        submissions = SUBMISSION_REF.where(
-            filter=FieldFilter("student.telegram_id", "==", student_id)
-        ).stream()
-        
-        submissions = [sub.to_dict() for sub in submissions]
-        
-        if not submissions:
+    def get_user_stats(student_id: str) -> dict:
+        user_submissions = SubmissionRepository.get_user_submission(student_id)
+        all_questions = QuestionRepository.get_structured_questions()
+        all_contests = ContestRepository.get_structured_contests()
+
+
+        if not user_submissions:
             return {
                 "total_contests": 0,
                 "total_questions": 0,
                 "correct_answers": 0,
-                "accuracy": 0,
-                "average_time": 0,
+                "accuracy": 0.0,
+                "average_time": 0.0,
                 "subjects": {},
                 "chapters": {},
                 "grades": {},
-                "performance_trend": []
+                "performance_trend": [],
             }
 
-        # Calculate basic stats
-        total_contests = len(submissions)
-        total_questions = sum(sub.get("total_questions", 0) for sub in submissions)
-        correct_answers = sum(sub.get("correct_answers", 0) for sub in submissions)
-        accuracy = round((correct_answers / total_questions) * 100, 2) if total_questions else 0
-        
-        # Calculate average time per question (convert hh:mm:ss to seconds if needed)
+        contests_participated = set()
         total_time_seconds = 0
-        for sub in submissions:
-            time_spend = sub.get("time_spend", 0)
-            if isinstance(time_spend, str):
-                try:
-                    h, m, s = map(int, time_spend.split(':'))
-                    total_time_seconds += h * 3600 + m * 60 + s
-                except:
-                    pass
-            else:
-                total_time_seconds += time_spend
-        
-        average_time = round(total_time_seconds / total_questions, 2) if total_questions else 0
 
-        # Calculate subject, chapter, and grade stats
-        subject_stats = defaultdict(lambda: {"total": 0, "correct": 0, "accuracy": 0})
-        chapter_stats = defaultdict(lambda: {"total": 0, "correct": 0, "accuracy": 0})
-        grade_stats = defaultdict(lambda: {"total": 0, "correct": 0, "accuracy": 0})
+        subjects = defaultdict(lambda: {"total": 0, "correct": 0})
+        chapters = defaultdict(lambda: {"total": 0, "correct": 0})
+        grades = defaultdict(lambda: {"total": 0, "correct": 0})
+        performance_trend = defaultdict(lambda: {"total": 0, "correct": 0})
 
-        for submission in submissions:
-            questions = submission.get("questions", [])
-            for q in questions:
-                subject = q.get("subject", "Unknown")
-                chapter = q.get("chapter", "Unknown")
-                grade = q.get("grade", "Unknown")
-                is_correct = q.get("is_correct", False)
+        for sub in user_submissions:
+            contest = all_contests.get(sub['contest_id'])
+            if not contest:
+                continue
 
-                subject_stats[subject]["total"] += 1
-                chapter_stats[chapter]["total"] += 1
-                grade_stats[grade]["total"] += 1
+            contests_participated.add(contest['id'])
 
+            try:
+                h, m, s = map(int, sub['time_spend'].split(':'))
+                total_time_seconds += h * 3600 + m * 60 + s
+            except (ValueError, AttributeError):
+                pass  
+
+            missed_question_ids = set(sub['missed_questions'])
+            submission_month = sub['submission_time'].strftime('%Y-%m')
+            for question_id in contest['questions']:
+                question = all_questions[question_id] if question_id in all_questions else None
+                if not question:
+                    continue
+
+                is_correct = question_id not in missed_question_ids
+                subjects[question['subject']]['total'] += 1
+                chapters[question['chapter']]['total'] += 1
+                grades[question['grade']]['total'] += 1
+                performance_trend[submission_month]['total'] += 1
                 if is_correct:
-                    subject_stats[subject]["correct"] += 1
-                    chapter_stats[chapter]["correct"] += 1
-                    grade_stats[grade]["correct"] += 1
+                    subjects[question['subject']]['correct'] += 1
+                    chapters[question['chapter']]['correct'] += 1
+                    grades[question['grade']]['correct'] += 1
+                    performance_trend[submission_month]['correct'] += 1
 
-        # Calculate accuracy percentages
-        for subject in subject_stats:
-            total = subject_stats[subject]["total"]
-            correct = subject_stats[subject]["correct"]
-            subject_stats[subject]["accuracy"] = round((correct / total) * 100, 2) if total else 0
+        total_contests_val = len(contests_participated)
+        total_questions_val = sum(cat['total'] for cat in subjects.values())
+        correct_answers_val = sum(cat['correct'] for cat in subjects.values())
 
-        for chapter in chapter_stats:
-            total = chapter_stats[chapter]["total"]
-            correct = chapter_stats[chapter]["correct"]
-            chapter_stats[chapter]["accuracy"] = round((correct / total) * 100, 2) if total else 0
+        accuracy_val = (correct_answers_val / total_questions_val * 100) if total_questions_val > 0 else 0.0
+        average_time_val = total_time_seconds / total_contests_val if total_contests_val > 0 else 0.0
 
-        for grade in grade_stats:
-            total = grade_stats[grade]["total"]
-            correct = grade_stats[grade]["correct"]
-            grade_stats[grade]["accuracy"] = round((correct / total) * 100, 2) if total else 0
+        for category_data in [subjects, chapters, grades]:
+            for value in category_data.values():
+                value['accuracy'] = round((value['correct'] / value['total'] * 100), 2) if value['total'] > 0 else 0.0
 
-        # Create performance trend (last 6 months)
-        performance_trend = []
-        now = datetime.utcnow()
-        for i in range(5, -1, -1):
-            month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=30*i)
-            month_end = (month_start + timedelta(days=30)).replace(hour=23, minute=59, second=59)
-            
-            month_submissions = [
-                sub for sub in submissions 
-                if month_start <= datetime.strptime(sub.get("submission_time"), "%Y-%m-%dT%H:%M:%S") <= month_end
-            ]
-            
-            month_questions = sum(sub.get("total_questions", 0) for sub in month_submissions)
-            month_correct = sum(sub.get("correct_answers", 0) for sub in month_submissions)
-            month_accuracy = round((month_correct / month_questions) * 100, 2) if month_questions else 0
-            
-            performance_trend.append({
-                "month": month_start.strftime("%b"),
-                "accuracy": month_accuracy,
-                "questions": month_questions
+        trend_list = []
+        for month, data in sorted(performance_trend.items()):
+            trend_list.append({
+                "month": month,
+                "accuracy": round((data['correct'] / data['total'] * 100), 2) if data['total'] > 0 else 0.0,
+                "questions": data['total']
             })
 
         return {
-            "total_contests": total_contests,
-            "total_questions": total_questions,
-            "correct_answers": correct_answers,
-            "accuracy": accuracy,
-            "average_time": average_time,
-            "subjects": dict(subject_stats),
-            "chapters": dict(chapter_stats),
-            "grades": dict(grade_stats),
-            "performance_trend": performance_trend
+            "total_contests": total_contests_val,
+            "total_questions": total_questions_val,
+            "correct_answers": correct_answers_val,
+            "accuracy": round(accuracy_val, 2),
+            "average_time": round(average_time_val, 2), 
+            "subjects": dict(subjects),
+            "chapters": dict(chapters),
+            "grades": dict(grades),
+            "performance_trend": trend_list
         }

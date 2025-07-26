@@ -1,22 +1,43 @@
 from app.db.firebase import CONTEST_REF, SUBMISSION_REF, STUDENT_REF,REGISTERED__REF
 from uuid import uuid4
 from datetime import datetime, timezone
+from app.repositories.question_repo import QuestionRepository
+from google.cloud.firestore import FieldFilter
 
 class ContestRepository:
     @staticmethod
     def get_all_contests():
+
         return [doc.to_dict() for doc in CONTEST_REF.stream()]
+    
+    def get_structured_contests():
+        contests = ContestRepository.get_all_contests()
+        structured_data = {}
+        for contest in contests:
+            structured_data[contest["id"]] = contest
+        return structured_data
     
     @staticmethod
     def is_user_registered(contest_id: str, student_id: str):
-        registration = REGISTERED__REF.where("contest_id", "==", contest_id).where("student_id", "==", student_id).get()
+        registration = REGISTERED__REF.where(filter=FieldFilter("contest_id", "==", contest_id)).where(filter=FieldFilter("student_id", "==", student_id)).get()
         return registration[0].exists if registration else False
 
     @staticmethod
     def get_contest_by_id(contest_id):
         ref = CONTEST_REF.document(contest_id).get()
-        return ref.to_dict() if ref.exists else {}
-    @staticmethod
+        if not ref.exists:
+            raise ValueError("Contest not found.")
+        final_result = ref.to_dict() 
+        if not final_result:
+            return {}
+        all_questions = QuestionRepository.get_structured_questions()
+        if "questions" in final_result:
+            final_result["questions"] = [all_questions[q_id] for q_id in final_result["questions"] if q_id in all_questions]
+        else:
+            final_result["questions"] = []
+
+        return final_result
+    @staticmethod   
     def get_participants(contest_id):
         registerations ,res = REGISTERED__REF.where("contest_id", "==", contest_id).stream(), []
         for doc in registerations:
@@ -33,24 +54,11 @@ class ContestRepository:
             return []
         
         return real_contest["active_contestant"]
-        
-    @staticmethod
-    def register_contest(contest_id,student_id):
-        contest = REGISTERED__REF.document(contest_id).get()
-        print(f"student_id : {student_id}",f"contest_id : {contest_id}")
-        if not contest.exists:
-            REGISTERED__REF.document(contest_id).set({"registered": [student_id],"active_contestant": []})
-            return True
-        contest = contest.to_dict()
-        if contest:
-            contest["registered"].append(student_id)
-        REGISTERED__REF.document(contest_id).update({"registered": contest["registered"] if contest else [student_id]})
-        return True
 
     @staticmethod
     def add_contest(data):
         contest_id = str(uuid4()).replace("-", "")
-        CONTEST_REF.document(contest_id).set({**data, "active_contestant": [], "submissions": [], "id": contest_id})
+        CONTEST_REF.document(contest_id).set({**data, "id": contest_id})
         return contest_id
 
     @staticmethod
