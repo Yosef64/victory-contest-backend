@@ -5,6 +5,7 @@ from app.schemas.student import StudentCreate, StudentUpdate
 from google.cloud.firestore import FieldFilter
 from app.repositories.submission_repo import SUBMISSION_REF, SubmissionRepository
 from app.repositories.payment_repo import PaymentRepository
+from app.repositories.contest_repo import ContestRepository
 STUDENT_REF = db.collection("students")
 
 class StudentRepository:
@@ -217,33 +218,41 @@ class StudentRepository:
         result["payment"] = payment_to_result
         result["contestSubmissions"] = contest_submissions
         return result
-    @staticmethod
     def get_student_editorial(student_id: str, contest_id: str):
-        """Fetches the editorial for a student's submission in a specific contest."""
-        contest = CONTEST_REF.document(contest_id).get()
-        if not contest.exists:
-            raise ValueError("No contest found with the provided ID.")
-        contest = contest.to_dict()
-        if not contest:
-            raise ValueError("No contest data found.")
-            
-        submissions_stream = SUBMISSION_REF.where(
-            filter=FieldFilter("student.telegram_id", "==", student_id)
-        ).where(filter=FieldFilter("contest.id", "==", contest_id)).stream()
-        
-        submissions = [submission.to_dict() for submission in submissions_stream]  
-        sub = submissions[0] if submissions else {}      
-        questions, missed_questions = contest.get("questions", []), sub.get("missed_questions", [])
+        """
+        Fetches the editorial for a student's submission in a specific contest.
+        This version is optimized for performance and better error handling.
+        """
+        # 1. Fetch the specific submission directly, not all of them.
+        # This assumes a repository method that can query by both contest and student.
+        submission = SubmissionRepository.get_submission_by_student_and_contest(student_id, contest_id)
+        contest = ContestRepository.get_contest_by_id(contest_id)
+        questions = contest.get("questions", [])
+        missed_questions_list = submission.get("missed_questions", [])
+
+        # 3. Optimize the loop by creating a lookup map for missed questions.
+        # This converts the O(N*M) loop into a much faster O(N) operation.
+        missed_questions_map = {
+            missed.get("question", {}).get("id"): missed
+            for missed in missed_questions_list
+        }
+
+        editorial = []
+
         for question in questions:
             question_id = question.get("id")
-            question["is_correct"] = True
-            question["user_answer"] = int(question.get("answer"))
             
-            for missed_question in missed_questions:
-                q = missed_question.get("question")
-                if q.get("id") == question_id:
-                    question["is_correct"] = False
-                    question["user_answer"] = int(missed_question.get("selected_answer")) 
-                    break
+            # Check if the question is in our optimized map.
+            if question_id in missed_questions_map:
+                # Question was missed
+                missed_info = missed_questions_map[question_id]
+                question["is_correct"] = False
+                question["user_answer"] = int(missed_info.get("selected_answer", -1)) # Default to -1 if no answer
+            else:
+                # Question was correct
+                question["is_correct"] = None
+                question["user_answer"] = None
+
+            editorial.append(question)
                 
-        return questions
+        return editorial

@@ -5,11 +5,23 @@ from google.cloud.firestore import FieldFilter
 from uuid import uuid4
 from app.repositories.date import DateService
 from collections import defaultdict
+from app.repositories.contest_repo import ContestRepository
 
 class SubmissionRepository:
     @staticmethod
     def get_all_submissions():
-        return [doc.to_dict() for doc in SUBMISSION_REF.stream()]
+        submissions ,final_result= SUBMISSION_REF.stream(),[]
+        contests = ContestRepository.get_structured_contests()
+        for doc in submissions:
+            submission = doc.to_dict()
+            contest_id = submission.get("contest_id")
+            if contest_id in contests:
+                contest = contests[contest_id]
+                submission["contest"] = contest
+            else:
+                submission["contest"] = {}
+            final_result.append(submission)
+        return final_result
     
     @staticmethod
     def get_by_range(start_time,end_time):
@@ -53,8 +65,25 @@ class SubmissionRepository:
     @staticmethod
     def get_submissions_by_contest(contest_id):
         docs = SUBMISSION_REF.where(filter=FieldFilter("contest_id", "==", contest_id)).stream()
+        contests = ContestRepository.get_structured_contests()
+        final_result = []
+        for doc in docs:
+            submission = doc.to_dict()
+            contest = contests.get(submission.get("contest_id"), {})
+            submission["contest"] = contest
+            final_result.append(submission)
+        return final_result
+    @staticmethod
+    def get_submission_by_student_and_contest(student_id: str, contest_id: str):
+        query = SUBMISSION_REF.where(filter=FieldFilter("student.telegram_id", "==", student_id))\
+                             .where(filter=FieldFilter("contest_id", "==", contest_id))
+        contest = ContestRepository.get_structured_contests().get(contest_id, {})
+        docs = query.stream()
         submissions = [doc.to_dict() for doc in docs]
-        return submissions
+        if submissions:
+            submissions[0]["contest"] = contest
+            return submissions[0]
+        return {}
     @staticmethod
     def put_wrong_answers(data):
         ref = WRONG_ANSWER_REF.document(data["user_id"])
@@ -80,7 +109,7 @@ class SubmissionRepository:
     @staticmethod
     def get_structured_submissions_by_contest(contest_id:str):
         submissions = defaultdict(list)
-        query = SUBMISSION_REF.where("contest.id", "==", contest_id)
+        query = SUBMISSION_REF.where("contest_id", "==", contest_id)
         for doc in query.stream():
             submission = doc.to_dict()
             student_data = submission.get("student", {})

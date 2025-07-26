@@ -1,3 +1,4 @@
+from collections import defaultdict
 from app.db.firebase import QUESTION_REF,SUBMISSION_REF
 from app.repositories.image_repo import Image
 from uuid import uuid4
@@ -10,6 +11,13 @@ class QuestionRepository:
         return [
     doc.to_dict() if "id" in doc.to_dict() else {**doc.to_dict(), "id": doc.id} 
     for doc in QUESTION_REF.stream()]
+    def get_structured_questions():
+        questions = QuestionRepository.get_questions()
+        structured_data = {}
+        for question in questions:
+            structured_data[question["id"]] = question
+
+        return structured_data
     
     @staticmethod
     def add_questions(questions):
