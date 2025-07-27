@@ -244,7 +244,7 @@ class StudentRepository:
                 question["is_correct"] = False
                 question["user_answer"] = int(missed_info.get("selected_answer", -1)) 
             else:
-                missed_info = missed_questions_map[question_id]
+                missed_info = missed_questions_map[question_id] if question_id in missed_questions_map else None
                 question["is_correct"] = None if not submission else  True
                 question["user_answer"] = missed_info["selected_answer"] if missed_info else None
 
