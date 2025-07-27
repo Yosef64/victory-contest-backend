@@ -10,8 +10,8 @@ from app.api.admin import router as admin_router
 from app.api.feedback import router as feedback_router # NEW: Import the feedback router
 from app.api.notification import router as notification_router
 from app.api.statistics import router as statistics_router # Import statistics router
-from app.api.leaderboard import router as leaderboard_router # Import leaderboard router    
-
+from app.api.leaderboard import router as leaderboard_router   
+from app.api.ai import router as ai_router 
 app = FastAPI()
 
 # CORS middleware
@@ -40,4 +40,5 @@ app.include_router(admin_router,prefix="/api/admin", tags=["Admin"]) # Corrected
 app.include_router(feedback_router, prefix="/api/feedback", tags=["Feedback"]) # NEW: Include the feedback router
 app.include_router(notification_router, prefix="/api/notification", tags=["Notification"]) # Include notification router
 app.include_router(statistics_router, prefix="/api/statistics", tags=["Statistics"]) # Include statistics router
-app.include_router(leaderboard_router, prefix="/api/leaderboard", tags=["Leaderboard"]) # Include leaderboard router
+app.include_router(leaderboard_router, prefix="/api/leaderboard", tags=["Leaderboard"]) 
+app.include_router(ai_router, prefix="/api/ai", tags=["AI"])
