@@ -6,7 +6,7 @@ from uuid import uuid4
 from app.repositories.date import DateService
 from collections import defaultdict
 from app.repositories.contest_repo import ContestRepository
-
+from app.repositories.question_repo import QuestionRepository
 class SubmissionRepository:
     @staticmethod
     def get_all_submissions():
@@ -78,11 +78,22 @@ class SubmissionRepository:
         query = SUBMISSION_REF.where(filter=FieldFilter("student.telegram_id", "==", student_id))\
                              .where(filter=FieldFilter("contest_id", "==", contest_id))
         contest = ContestRepository.get_structured_contests().get(contest_id, {})
+        all_questions = QuestionRepository.get_structured_questions()
+        
         docs = query.stream()
         submissions = [doc.to_dict() for doc in docs]
         if submissions:
-            submissions[0]["contest"] = contest
-            return submissions[0]
+            submission = submissions[0]
+            submission["contest"] = contest
+            missed_questions ,m_qs= [],submission.get("missed_questions", [])
+            for m_q in m_qs:
+                question = all_questions.get(m_q.get("id"), {})
+                if question:
+                    question["selected_answer"] = m_q.get("selected_answer", -1)
+                    missed_questions.append(question)
+            submission["missed_questions"] = missed_questions
+            
+            return submission
         return {}
     @staticmethod
     def put_wrong_answers(data):

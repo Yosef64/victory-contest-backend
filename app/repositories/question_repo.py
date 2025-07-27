@@ -4,6 +4,7 @@ from app.repositories.image_repo import Image
 from uuid import uuid4
 from datetime import datetime, timedelta
 from google.cloud import firestore
+from google.cloud.firestore import FieldFilter
 import pytz
 class QuestionRepository:
     @staticmethod
@@ -77,7 +78,7 @@ class QuestionRepository:
     @staticmethod
     def get_missed_questions(student_id: str):
         try:
-            query = SUBMISSION_REF.where("student.student_id", "==", student_id)
+            query = SUBMISSION_REF.where(filter=FieldFilter("student.student_id", "==", student_id))
             docs = list(query.stream())
 
             if not docs:
@@ -198,7 +199,6 @@ class QuestionRepository:
     @staticmethod
     def get_submissions_by_contest_and_student(contest_id: str, student_id: str):
         try:
-            # Fetch the submission for the given contest and student
             query = (
                 SUBMISSION_REF
                 .where(filter=firestore.FieldFilter("contest_id", "==", contest_id))
@@ -206,12 +206,10 @@ class QuestionRepository:
             )
             docs = list(query.stream())
 
-            # If no submission is found, return an empty dictionary
             if not docs:
                 print(f"No submission found for contest_id: {contest_id} and student_id: {student_id}")
                 return {}
 
-            # Get the first (and only) submission
             submission = docs[0].to_dict()
             missed_questions = submission.get("missed_question", []) if submission else []
 
