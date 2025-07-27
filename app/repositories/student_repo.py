@@ -223,35 +223,30 @@ class StudentRepository:
         Fetches the editorial for a student's submission in a specific contest.
         This version is optimized for performance and better error handling.
         """
-        # 1. Fetch the specific submission directly, not all of them.
-        # This assumes a repository method that can query by both contest and student.
+        
         submission = SubmissionRepository.get_submission_by_student_and_contest(student_id, contest_id)
         contest = ContestRepository.get_contest_by_id(contest_id)
         questions = contest.get("questions", [])
         missed_questions_list = submission.get("missed_questions", [])
-
-        # 3. Optimize the loop by creating a lookup map for missed questions.
-        # This converts the O(N*M) loop into a much faster O(N) operation.
+        print(missed_questions_list)
         missed_questions_map = {
-            missed.get("question", {}).get("id"): missed
+            missed.get("id"): missed
             for missed in missed_questions_list
         }
+        print(missed_questions_map)
 
         editorial = []
 
         for question in questions:
-            question_id = question.get("id")
-            
-            # Check if the question is in our optimized map.
+            question_id = question.get("id")            
             if question_id in missed_questions_map:
-                # Question was missed
                 missed_info = missed_questions_map[question_id]
                 question["is_correct"] = False
-                question["user_answer"] = int(missed_info.get("selected_answer", -1)) # Default to -1 if no answer
+                question["user_answer"] = int(missed_info.get("selected_answer", -1)) 
             else:
-                # Question was correct
-                question["is_correct"] = None
-                question["user_answer"] = None
+                missed_info = missed_questions_map[question_id]
+                question["is_correct"] = None if not submission else  True
+                question["user_answer"] = missed_info["selected_answer"] if missed_info else None
 
             editorial.append(question)
                 

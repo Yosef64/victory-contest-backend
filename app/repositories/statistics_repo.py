@@ -55,7 +55,7 @@ class StatisticsRepository:
             except (ValueError, AttributeError):
                 pass
 
-            missed_question_ids = set(sub['missed_questions'])
+            missed_question_ids = set([missed.get("id") for missed in sub['missed_questions']])
 
             try:
                 submission_dt_object = datetime.fromisoformat(sub['submission_time'].replace('Z', '+00:00'))
